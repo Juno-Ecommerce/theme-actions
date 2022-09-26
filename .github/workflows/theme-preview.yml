@@ -3,7 +3,7 @@ name: "🧬 Theme preview"
 on: workflow_call
 
 jobs:
-  add-comment:
+  comment:
     runs-on: ubuntu-latest
     steps:
       - uses: mshick/add-pr-comment@v1
@@ -14,7 +14,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: "github-actions[bot]"
 
-  create-preview:
+  create:
     runs-on: ubuntu-latest
     if: contains(github.event.*.labels.*.name, 'preview')
     steps:
