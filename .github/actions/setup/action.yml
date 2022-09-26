@@ -1,0 +1,24 @@
+name: "🏗 Setup"
+description: ""
+author: ""
+runs:
+  using: "composite"
+  steps:
+    # Checkout repo
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+    # Setup node
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "16"
+        cache: "yarn"
+    # Install node dependencies
+    - run: yarn install --frozen-lockfile
+    # Webpack cache
+    - uses: actions/cache@v3
+      with:
+        path: node_modules/.cache/webpack/
+        key: ${{ github.head_ref }}-webpack-build
+        restore-keys: |
+          main-webpack-build

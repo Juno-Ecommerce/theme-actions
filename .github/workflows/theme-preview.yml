@@ -14,13 +14,8 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: "github-actions[bot]"
 
-  call-setup:
-    uses: Juno-Ecommerce/theme-actions/.github/workflows/setup.yml@main
-    if: contains(github.event.*.labels.*.name, 'preview')
-    secrets: inherit
-
   create-preview:
     runs-on: ubuntu-latest
-    needs: call-setup
+    if: contains(github.event.*.labels.*.name, 'preview')
     steps:
-      - run: ls -la
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
