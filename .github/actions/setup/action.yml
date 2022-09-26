@@ -1,6 +1,10 @@
 name: "🏗 Setup"
 description: ""
 author: ""
+inputs:
+  runWebpack:
+    description: "Run webpack build"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -23,3 +27,10 @@ runs:
         key: ${{ github.head_ref }}-webpack-build
         restore-keys: |
           main-webpack-build
+    # TEST
+    - run: echo inputs.runWeback - ${{ inputs.runWeback }}
+      shell: bash
+    # Build repository
+    - if: ${{ inputs.runWeback == true }}
+      run: yarn webpack:build
+      shell: bash

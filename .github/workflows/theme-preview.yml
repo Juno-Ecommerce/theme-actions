@@ -1,6 +1,14 @@
 name: "🧬 Theme preview"
 
-on: workflow_call
+on:
+  workflow_call:
+    secrets:
+      PASSWORD:
+        required: true
+      STORE:
+        required: true
+      TOKEN:
+        required: true
 
 jobs:
   comment:
@@ -11,7 +19,7 @@ jobs:
           message: |
             :exclamation: **Create a Preview theme** :exclamation:
             To create a preview theme add `preview` to the labels on the right hand side
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.TOKEN }}
           repo-token-user-login: "github-actions[bot]"
 
   create:
@@ -19,3 +27,23 @@ jobs:
     if: contains(github.event.*.labels.*.name, 'preview')
     steps:
       - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+        with:
+          runWebpack: "true"
+      # - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
+      #   with:
+      #     ACTION: "CREATE_PREVIEW"
+      #     GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      #     SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+      #     SHOPIFY_STORE: ${{ secrets.STORE }}
+
+  # remove:
+  #   runs-on: ubuntu-latest
+  #   if: contains(github.event.*.labels.*.name, 'preview')
+  #   steps:
+  #     - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+  #     - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
+  #       with:
+  #         ACTION: "REMOVE_PREVIEW"
+  #         GITHUB_TOKEN: ${{ secrets.TOKEN }}
+  #         SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+  #         SHOPIFY_STORE: ${{ secrets.STORE }}
