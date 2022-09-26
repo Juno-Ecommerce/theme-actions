@@ -18,4 +18,4 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.*.labels.*.name, 'preview')
     steps:
-      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+      - uses: ./.github/actions/setup
