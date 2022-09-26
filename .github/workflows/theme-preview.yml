@@ -13,3 +13,14 @@ jobs:
             To create a preview theme add `preview` to the labels on the right hand side
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: "github-actions[bot]"
+
+  call-setup:
+    uses: Juno-Ecommerce/theme-actions/.github/workflows/setup.yml@main
+    if: contains(github.event.*.labels.*.name, 'preview')
+    secrets: inherit
+
+  create-preview:
+    runs-on: ubuntu-latest
+    needs: call-setup
+    steps:
+      - run: ls -la
