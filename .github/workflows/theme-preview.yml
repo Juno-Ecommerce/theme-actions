@@ -1,0 +1,15 @@
+name: "🧬 Theme preview"
+
+on: workflow_call
+
+jobs:
+  add-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mshick/add-pr-comment@v1
+        with:
+          message: |
+            :exclamation: **Create a Preview theme** :exclamation:
+            To create a preview theme add `preview` to the labels on the right hand side
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: "github-actions[bot]"
