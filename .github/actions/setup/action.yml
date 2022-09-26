@@ -1,10 +1,18 @@
 name: "🏗 Setup"
-description: ""
-author: ""
+
 inputs:
   runWebpack:
     description: "Run webpack build"
-    required: false
+    default: false
+
+outputs:
+  BUILD_DIRECTORY:
+    description: "Webpack build directory path"
+    value: ${{ steps.build.outputs.BUILD_DIRECTORY }}
+  BUILD_MANIFEST_FILE:
+    description: "Manifest asset name"
+    value: ${{ steps.build.outputs.BUILD_MANIFEST_FILE }}
+
 runs:
   using: "composite"
   steps:
@@ -27,10 +35,8 @@ runs:
         key: ${{ github.head_ref }}-webpack-build
         restore-keys: |
           main-webpack-build
-    # TEST
-    - run: echo inputs.runWeback - ${{ inputs.runWeback }}
-      shell: bash
     # Build repository
-    - if: ${{ inputs.runWeback == true }}
+    - id: build
       run: yarn webpack:build
+      if: inputs.runWebpack
       shell: bash
