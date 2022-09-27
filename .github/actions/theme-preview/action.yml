@@ -1,6 +1,5 @@
 name: "Theme preview"
-description: ""
-author: ""
+
 inputs:
   ACTION:
     description: "'CREATE_PREVIEW' (creates a PR specific Shopify development theme), 'REMOVE_PREVIEW' (removes a previously created PR specific Shopify development theme)"
@@ -11,12 +10,7 @@ inputs:
   SHOPIFY_PASSWORD:
     description: "The Shopify store's private app password used with themekit"
     required: true
-  GITHUB_TOKEN:
-    description: "Github authentication token that allows comments to be created on PRs (optional)"
-    required: false
-  BUILD_DIRECTORY:
-    description: "Path to dist folder created by webpack build"
-    required: false
+
 runs:
   using: "node16"
   main: "index.min.js"

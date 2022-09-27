@@ -1,0 +1,22 @@
+on: workflow_call
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  WORK_DIR: ${{ github.workspace }}
+  BUILD_DIR: dist
+  BUILD_MANIFEST: assets/__manifest.json
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+      - run: yarn lint
+
+  theme-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+        with:
+          runWebpack: true
+      - uses: shopify/theme-check-action@v1

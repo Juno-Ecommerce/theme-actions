@@ -1,0 +1,28 @@
+on:
+  workflow_call:
+    secrets:
+      PASSWORD:
+        required: true
+      STORE:
+        required: true
+      THEME_ID:
+        required: true
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  WORK_DIR: ${{ github.workspace }}
+  BUILD_DIR: dist
+  BUILD_MANIFEST: assets/__manifest.json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+        with:
+          runWebpack: true
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
+        with:
+          SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+          SHOPIFY_STORE: ${{ secrets.STORE }}
+          SHOPIFY_THEME_ID: ${{ secrets.THEME_ID }}

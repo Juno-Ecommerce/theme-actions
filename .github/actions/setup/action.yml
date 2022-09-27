@@ -5,21 +5,11 @@ inputs:
     description: "Run webpack build"
     default: false
 
-outputs:
-  BUILD_DIRECTORY:
-    description: "Webpack build directory path"
-    value: ${{ steps.build.outputs.BUILD_DIRECTORY }}
-  BUILD_MANIFEST_FILE:
-    description: "Manifest asset name"
-    value: ${{ steps.build.outputs.BUILD_MANIFEST_FILE }}
-
 runs:
   using: "composite"
   steps:
     # Checkout repo
     - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.head_ref }}
     # Setup node
     - uses: actions/setup-node@v3
       with:
@@ -30,13 +20,13 @@ runs:
       shell: bash
     # Webpack cache
     - uses: actions/cache@v3
+      if: inputs.runWebpack
       with:
         path: node_modules/.cache/webpack/
         key: ${{ github.head_ref }}-webpack-build
         restore-keys: |
           main-webpack-build
-    # Build repository
-    - id: build
-      run: yarn webpack:build
+    # Webpack build
+    - run: yarn webpack:build
       if: inputs.runWebpack
       shell: bash

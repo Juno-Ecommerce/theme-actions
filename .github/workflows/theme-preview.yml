@@ -1,5 +1,3 @@
-name: "🧬 Theme preview"
-
 on:
   workflow_call:
     secrets:
@@ -7,64 +5,45 @@ on:
         required: true
       STORE:
         required: true
-      TOKEN:
-        required: true
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  WORK_DIR: ${{ github.workspace }}
+  BUILD_DIR: dist
+  BUILD_MANIFEST: assets/__manifest.json
 
 jobs:
-  # comment:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: mshick/add-pr-comment@v1
-  #       with:
-  #         message: |
-  #           :exclamation: **Create a Preview theme** :exclamation:
-  #           To create a preview theme add `preview` to the labels on the right hand side
-  #         repo-token: ${{ secrets.TOKEN }}
-  #         repo-token-user-login: "github-actions[bot]"
-
-  # create:
-  #   runs-on: ubuntu-latest
-  #   if: contains(github.event.*.labels.*.name, 'preview') && contains(fromJson('["closed"]'), github.event_name)
-  #   steps:
-  #     - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
-  #       id: setup
-  #       with:
-  #         runWebpack: true
-  #     - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
-  #       with:
-  #         ACTION: "CREATE_PREVIEW"
-  #         BUILD_DIRECTORY: ${{ steps.setup.outputs.BUILD_DIRECTORY }}
-  #         BUILD_MANIFEST_FILE: ${{ steps.setup.outputs.BUILD_MANIFEST_FILE }}
-  #         GITHUB_TOKEN: ${{ secrets.TOKEN }}
-  #         SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
-  #         SHOPIFY_STORE: ${{ secrets.STORE }}
-
-  # remove:
-  #   runs-on: ubuntu-latest
-  #   if: contains(github.event.*.labels.*.name, 'preview') && contains(fromJson('["closed"]'), github.event_name)
-  #   steps:
-  #     - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
-  #       with:
-  #         ACTION: "REMOVE_PREVIEW"
-  #         GITHUB_TOKEN: ${{ secrets.TOKEN }}
-  #         SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
-  #         SHOPIFY_STORE: ${{ secrets.STORE }}
-
-  build:
+  comment:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - STORE: juno-sandbox.myshopify.com
-            THEME_ID: 124253798443
-            PASSWORD: PASSWORD
-          - STORE: junoify-2-0.myshopify.com
-            THEME_ID: 129376682165
-            PASSWORD: PASSWORD
-    env:
-      PASSWORD: ${{secrets[matrix.PASSWORD]}}
+    if: contains(github.event.*.labels.*.name, 'preview') == false && github.event_name != 'closed'
     steps:
-      - run: echo PASSWORD ${{ env.PASSWORD }}.
-      - run: echo STORE ${{ matrix.STORE }}.
-      - run: echo THEME_ID ${{ matrix.THEME_ID }}.
+      - uses: mshick/add-pr-comment@v1
+        with:
+          message: |
+            :exclamation: **Create a Preview theme** :exclamation:
+            To create a preview theme add `preview` to the labels on the right hand side
+          repo-token: ${{ env.GITHUB_TOKEN }}
+          repo-token-user-login: "github-actions[bot]"
+
+  create:
+    runs-on: ubuntu-latest
+    if: contains(github.event.*.labels.*.name, 'preview') && github.event_name != 'closed'
+    steps:
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+        with:
+          runWebpack: true
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
+        with:
+          ACTION: "CREATE_PREVIEW"
+          SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+          SHOPIFY_STORE: ${{ secrets.STORE }}
+
+  remove:
+    runs-on: ubuntu-latest
+    if: contains(github.event.*.labels.*.name, 'preview') && github.event_name == 'closed'
+    steps:
+      - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview@main
+        with:
+          ACTION: "REMOVE_PREVIEW"
+          SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+          SHOPIFY_STORE: ${{ secrets.STORE }}

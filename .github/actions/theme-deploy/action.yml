@@ -1,0 +1,16 @@
+name: "Theme deploy"
+
+inputs:
+  SHOPIFY_STORE:
+    description: "The shopify development store i.e. my-store.myshopify.com"
+    required: true
+  SHOPIFY_THEME_ID:
+    description: "The Shopify store's theme"
+    required: true
+  SHOPIFY_PASSWORD:
+    description: "The Shopify store's themekit app password"
+    required: true
+
+runs:
+  using: "node16"
+  main: "index.min.js"
