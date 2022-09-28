@@ -1,17 +1,18 @@
-import { command as themeKit } from "@shopify/themekit";
 import * as core from "@actions/core";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import diff from "microdiff";
-import install from "@shopify/themekit/lib/install";
+import { themeKit } from "../../../lib/themekit";
 
 const SHOPIFY_PASSWORD = core.getInput("SHOPIFY_PASSWORD", { required: true });
 const SHOPIFY_STORE = core.getInput("SHOPIFY_STORE", { required: true });
 const SHOPIFY_THEME_ID = core.getInput("SHOPIFY_THEME_ID", { required: true });
 
-if (!process.env.WORK_DIR) throw new Error("Missing {WORK_DIR} environment variable");
-if (!process.env.BUILD_DIR) throw new Error("Missing {BUILD_DIR} environment variable");
+if (!process.env.WORK_DIR)
+  throw new Error("Missing {WORK_DIR} environment variable");
+if (!process.env.BUILD_DIR)
+  throw new Error("Missing {BUILD_DIR} environment variable");
 
 const BUILD_DIR = path.join(process.env.WORK_DIR, process.env.BUILD_DIR);
 const BUILD_MANIFEST = core.getInput("BUILD_MANIFEST");
@@ -23,12 +24,12 @@ try {
 }
 
 async function runAction() {
-  await install("silent");
-
   // TODO: Should we store the build manifest in Cache and only fallback to themekit when not available?
   const previousBuild = await getPreviousBuildData();
   const buildOutputHash = JSON.parse(
-    BUILD_MANIFEST ? fs.readFileSync(path.join(BUILD_DIR, BUILD_MANIFEST), "utf-8") : "{}"
+    BUILD_MANIFEST
+      ? fs.readFileSync(path.join(BUILD_DIR, BUILD_MANIFEST), "utf-8")
+      : "{}"
   );
 
   const changedDiff = diff(previousBuild, buildOutputHash);
@@ -94,16 +95,12 @@ function themeKitPerformAction(
     core.debug(`Skipped themekit action, no files provided`);
     return Promise.resolve();
   }
-  return themeKit(
-    action,
-    {
-      allowLive: true,
-      dir: BUILD_DIR,
-      password: SHOPIFY_PASSWORD,
-      store: SHOPIFY_STORE,
-      themeId: SHOPIFY_THEME_ID,
-      ...flags,
-    },
-    { logLevel: "silent" }
-  );
+  return themeKit(action, {
+    allowLive: true,
+    dir: BUILD_DIR,
+    password: SHOPIFY_PASSWORD,
+    store: SHOPIFY_STORE,
+    themeId: SHOPIFY_THEME_ID,
+    ...flags,
+  });
 }

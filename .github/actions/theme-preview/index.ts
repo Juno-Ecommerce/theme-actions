@@ -1,12 +1,11 @@
-import { command as themeKit } from "@shopify/themekit";
 import { fdir, type PathsOutput } from "fdir";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import fetch from "node-fetch";
 import fs from "fs/promises";
-import install from "@shopify/themekit/lib/install";
 import os from "os";
 import path from "path";
+import { themeKit } from "../../../lib/themekit";
 
 const SHOPIFY_PASSWORD = core.getInput("SHOPIFY_PASSWORD", { required: true });
 const SHOPIFY_STORE = core.getInput("SHOPIFY_STORE", { required: true });
@@ -14,8 +13,10 @@ const ACTION = core.getInput("ACTION", { required: true });
 const SHOPIFY_API_VERSION = "2022-10";
 const SHOPIFY_API_URL = `https://${SHOPIFY_STORE}/admin/api/${SHOPIFY_API_VERSION}`;
 
-if (!process.env.WORK_DIR) throw new Error("Missing {WORK_DIR} environment variable");
-if (!process.env.BUILD_DIR) throw new Error("Missing {BUILD_DIR} environment variable");
+if (!process.env.WORK_DIR)
+  throw new Error("Missing {WORK_DIR} environment variable");
+if (!process.env.BUILD_DIR)
+  throw new Error("Missing {BUILD_DIR} environment variable");
 
 const BUILD_DIR = path.join(process.env.WORK_DIR, process.env.BUILD_DIR);
 const PREVIEW_THEME_NAME = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
@@ -28,15 +29,16 @@ try {
 
 async function runAction() {
   const themeList = await getThemeList();
-  let previewTheme = themeList.find(({ name }) => name.includes(PREVIEW_THEME_NAME));
+  let previewTheme = themeList.find(({ name }) =>
+    name.includes(PREVIEW_THEME_NAME)
+  );
   core.debug(
-    "[DEBUG] - Preview theme data: " + previewTheme ? JSON.stringify(previewTheme) : "null"
+    "[DEBUG] - Preview theme data: " + previewTheme
+      ? JSON.stringify(previewTheme)
+      : "null"
   );
 
   if (ACTION === "CREATE_PREVIEW") {
-    core.info("Installing ThemeKit");
-    await install("silent");
-
     if (!previewTheme) {
       previewTheme = await duplicateLiveTheme();
     }
@@ -89,22 +91,20 @@ async function duplicateLiveTheme() {
   core.debug(`[DEBUG] - Created temporary directory: ${tmpDir}`);
   const previewThemePromise = createPreviewTheme();
   try {
-    await themeKit(
-      "download",
-      {
-        dir: tmpDir,
-        ignoredFiles: ["assets/**.*"],
-        live: true,
-        password: SHOPIFY_PASSWORD,
-        store: SHOPIFY_STORE,
-      },
-      { logLevel: "silent" }
-    );
+    await themeKit("download", {
+      dir: tmpDir,
+      ignoredFiles: ["assets/**.*"],
+      live: true,
+      password: SHOPIFY_PASSWORD,
+      store: SHOPIFY_STORE,
+    });
   } catch (error) {
     core.error("[ERROR] - Unable to download live theme.");
   }
   const previewTheme = await previewThemePromise;
-  core.debug(`[DEBUG] - Created preview theme: ${JSON.stringify(previewTheme)}`);
+  core.debug(
+    `[DEBUG] - Created preview theme: ${JSON.stringify(previewTheme)}`
+  );
   const [themeFiles, templateFiles] = (
     new fdir().withRelativePaths().crawl(tmpDir).sync() as PathsOutput
   ).reduce(
@@ -114,28 +114,20 @@ async function duplicateLiveTheme() {
     },
     [[], []] as any
   );
-  await themeKit(
-    "deploy",
-    {
-      dir: tmpDir,
-      files: themeFiles,
-      password: SHOPIFY_PASSWORD,
-      store: SHOPIFY_STORE,
-      themeId: previewTheme.id,
-    },
-    { logLevel: "silent" }
-  );
-  await themeKit(
-    "deploy",
-    {
-      dir: tmpDir,
-      files: templateFiles,
-      password: SHOPIFY_PASSWORD,
-      store: SHOPIFY_STORE,
-      themeId: previewTheme.id,
-    },
-    { logLevel: "silent" }
-  );
+  await themeKit("deploy", {
+    dir: tmpDir,
+    files: themeFiles,
+    password: SHOPIFY_PASSWORD,
+    store: SHOPIFY_STORE,
+    themeId: previewTheme.id,
+  });
+  await themeKit("deploy", {
+    dir: tmpDir,
+    files: templateFiles,
+    password: SHOPIFY_PASSWORD,
+    store: SHOPIFY_STORE,
+    themeId: previewTheme.id,
+  });
   return previewTheme;
 }
 
@@ -175,8 +167,13 @@ async function createGitHubComment(themeId) {
     throw new Error("Unable to find PR");
   }
 
-  const octokit = github.getOctokit(core.getInput("GITHUB_TOKEN"));
-  const commentIdentifier = "<!-- Comment by Shopify Theme Deploy Previews Action -->";
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error("Missing {GITHUB_TOKEN} environment variable");
+  }
+
+  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const commentIdentifier =
+    "<!-- Comment by Shopify Theme Deploy Previews Action -->";
   let commentID;
 
   findCommentId: {
@@ -186,7 +183,9 @@ async function createGitHubComment(themeId) {
       repo: github.context.repo.repo,
       issue_number: prID,
     });
-    commentID = listOfComments.find((comment) => comment.body?.includes(commentIdentifier))?.id;
+    commentID = listOfComments.find((comment) =>
+      comment.body?.includes(commentIdentifier)
+    )?.id;
     if (commentID) core.debug(`[DEBUG] - Found comment with ID: ${commentID}`);
     else core.debug(`[DEBUG] - Comment not found`);
   }
@@ -200,7 +199,7 @@ async function createGitHubComment(themeId) {
         issue_number: prID,
         body: `${commentIdentifier}\n🚀 Preview deployed successfully!\nPlease add the below urls to your Jira ticket, for the PM to review.\n
 
-
+\`\`\`
 Theme preview:
 https://${SHOPIFY_STORE}/?preview_theme_id=${themeId}
 

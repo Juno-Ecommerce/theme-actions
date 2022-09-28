@@ -18,11 +18,43 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Create GitHub deployment
+        id: deployment
+        uses: altinukshini/deployment-action@releases/v1
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          environment: production
+
       - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
         with:
           runWebpack: true
+
+      - name: Update deployment status (Inprogress)
+        uses: altinukshini/deployment-status@v1.0.1
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          state: "in_progress"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          description: "Deploying code for branch: "
+
       - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
         with:
           SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
           SHOPIFY_STORE: ${{ secrets.STORE }}
           SHOPIFY_THEME_ID: ${{ secrets.THEME_ID }}
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: altinukshini/deployment-status@v1.0.1
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          state: "success"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: altinukshini/deployment-status@v1.0.1
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          state: "failure"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
