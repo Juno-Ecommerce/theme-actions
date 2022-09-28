@@ -43,12 +43,12 @@ async function runAction() {
       previewTheme = await duplicateLiveTheme();
     }
 
-    deployPullRequestCode: {
-      let ignoredFiles = ["config/settings_data.json", "templates/*.json"];
-      const ignoredFilesGit = core.getInput("IGNORED_FILES")
-        ? core.getInput("IGNORED_FILES").replace(" ", "").split(",")
-        : [];
-      ignoredFiles = ignoredFiles.concat(ignoredFilesGit);
+    deployPR: {
+      const ignoredFiles = [
+        ...(core.getInput("IGNORED_FILES")
+          ? core.getInput("IGNORED_FILES").split(" ")
+          : []),
+      ];
       await themeKit("deploy", {
         dir: BUILD_DIR,
         env: "Preview Work",

@@ -37,6 +37,7 @@ jobs:
           ACTION: "CREATE_PREVIEW"
           SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
           SHOPIFY_STORE: ${{ secrets.STORE }}
+          IGNORED_FILES: ${{ secrets.IGNORED_FILES }}
 
   remove:
     runs-on: ubuntu-latest
