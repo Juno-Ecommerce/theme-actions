@@ -1,22 +1,26 @@
 on: workflow_call
 
 env:
-  GITHUB_TOKEN: ${{ github.token }}
-  WORK_DIR: ${{ github.workspace }}
-  BUILD_DIR: dist
-  BUILD_MANIFEST: assets/__manifest.json
+  THEME_ROOT: dist
+  BUILD_MANIFEST: assets/__manifest
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
-      - run: yarn lint
+      - name: Checkout repo + setup node
+        uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
+
+      - name: Run linters
+        run: pnpm run lint
 
   theme-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+      - name: Checkout repo + setup node
+        uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
         with:
-          runWebpack: true
-      - uses: shopify/theme-check-action@v1
+          build: true
+
+      - name: Run theme check
+        uses: shopify/theme-check-action@v1

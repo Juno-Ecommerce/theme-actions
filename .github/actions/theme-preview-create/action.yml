@@ -1,20 +1,16 @@
-name: "Theme deploy"
-
-branding:
-  icon: package
-  color: orange
+name: "Create or update preview theme"
 
 inputs:
   SHOPIFY_PASSWORD:
     description: "The Shopify store's private app password"
     required: true
-  SHOPIFY_STORE:
+  SHOPIFY_SHOP:
     description: "The shopify development store i.e. my-store.myshopify.com"
     required: true
-  SHOPIFY_THEME_ID:
-    description: "The Shopify store's theme id"
-    required: true
+  IGNORED_FILES:
+    description: "List of files to ignore"
+    required: false
 
 runs:
-  using: "node16"
-  main: "index.min.js"
+  using: "node"
+  main: "index.js"

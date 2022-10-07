@@ -1,4 +1,0 @@
-# Global
-ignore_files:
-  - config/settings_data.json
-  - templates/*.json

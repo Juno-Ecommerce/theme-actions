@@ -1,0 +1,19 @@
+name: "Setup Shopify CLI"
+
+branding:
+  icon: package
+  color: orange
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1
+
+    - name: Install Shopify CLI
+      run: gem install shopify-cli
+
+    - name: Configure Shopify CLI
+      run: node ${ github.action_path }}/index.js

@@ -1,0 +1,45 @@
+name: "Cache and install"
+
+branding:
+  icon: package
+  color: orange
+
+inputs:
+  build:
+    description: "Generate production build"
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2.2.2
+      id: pnpm-install
+      with:
+        version: 7
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm --prefer-offline install
+
+    - name: Restore build cache
+      uses: actions/cache@v3
+      if: inputs.build
+      with:
+        path: node_modules/.cache/webpack/
+        key: webpack-build-${{ github.head_ref }}
+        restore-keys: |
+          webpack-build-
+
+    - name: Generate production build
+      if: inputs.build
+      run: pnpm run webpack:build
+      shell: bash

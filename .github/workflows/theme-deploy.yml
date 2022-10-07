@@ -3,51 +3,55 @@ on:
     secrets:
       PASSWORD:
         required: true
-      STORE:
+      SHOP:
         required: true
       THEME_ID:
         required: true
 
 env:
-  GITHUB_TOKEN: ${{ github.token }}
-  WORK_DIR: ${{ github.workspace }}
-  BUILD_DIR: dist
-  BUILD_MANIFEST: assets/__manifest.json
+  CI: 1
+  THEME_ROOT: dist
+  BUILD_MANIFEST: assets/__manifest
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
+      SHOPIFY_SHOP: ${{ secrets.SHOP }}
+      SHOPIFY_THEME_ID: ${{ secrets.THEME_ID }}
     steps:
       - name: Create GitHub deployment
         id: deployment
         uses: altinukshini/deployment-action@releases/v1
         with:
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           environment: production
 
-      - uses: Juno-Ecommerce/theme-actions/.github/actions/setup@main
+      - name: Checkout repo + setup node
+        uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
         with:
-          runWebpack: true
+          build: true
+
+      - name: Setup Shopify CLI
+        uses: Juno-Ecommerce/theme-actions/.github/actions/shopify-cli@main
 
       - name: Update deployment status (Inprogress)
         uses: altinukshini/deployment-status@v1.0.1
         with:
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           state: "in_progress"
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
           description: "Deploying code for branch: "
 
-      - uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
-        with:
-          SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
-          SHOPIFY_STORE: ${{ secrets.STORE }}
-          SHOPIFY_THEME_ID: ${{ secrets.THEME_ID }}
+      - name: Deploy theme
+        uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
 
       - name: Update deployment status (success)
         if: success()
         uses: altinukshini/deployment-status@v1.0.1
         with:
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           state: "success"
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
 
@@ -55,6 +59,6 @@ jobs:
         if: failure()
         uses: altinukshini/deployment-status@v1.0.1
         with:
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           state: "failure"
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
