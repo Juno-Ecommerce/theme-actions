@@ -2,73 +2,49 @@ import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 import * as exec from "@actions/exec";
 import * as github from "@actions/github";
-import fetch from "node-fetch";
-
-if (!process.env.THEME_ROOT)
-  throw new Error("Missing [THEME_ROOT] environment variable");
+import { createTheme, getStoreThemes, logStep } from "../../../lib/utils";
 
 async function runAction() {
+  if (!process.env.THEME_ROOT)
+    throw new Error("Missing [THEME_ROOT] environment variable");
+
   const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
   const themeRoot = process.env.THEME_ROOT;
 
-  // TODO: Ignore files flag  -x, --ignore
-  // TODO: Better check?
-  try {
-    step("Update preview theme");
-    await exec.exec(
-      `shopify theme push ${themeRoot} --nodelete --theme="${themeName}"`,
-      undefined,
-      { failOnStdErr: true }
-    );
-    return;
-  } catch {
-    core.notice("Preview theme doesn't exist, creating.");
+  logStep("Check if preview theme already exists");
+  const allThemes = await getStoreThemes({
+    shop: process.env.SHOPIFY_SHOP,
+    password: process.env.SHOPIFY_PASSWORD,
+  });
+
+  let previewTheme = allThemes.find((t) => t.name === themeName);
+
+  if (!previewTheme) {
+    logStep("Preview theme not found, creating new theme");
+    previewTheme = await createTheme({
+      shop: process.env.SHOPIFY_SHOP,
+      password: process.env.SHOPIFY_PASSWORD,
+      themeName,
+    });
+
+    const tmpRoot = "dist-live-theme";
+    const restoreKey = "live-theme-cache";
+    const cacheKey = `${restoreKey}-${new Date().toISOString().split("T")[0]}`;
+    const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
+      restoreKey,
+    ]);
+    await exec.exec(`shopify theme pull ${tmpRoot} --live`);
+    if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+    await exec.exec(`shopify theme push ${tmpRoot} --theme=${previewTheme.id}`);
   }
 
-  step("Download live theme");
-  const restoreKey = "live-theme-cache";
-  const cacheKey = `${restoreKey}-${new Date().toISOString().split("T")[0]}`;
-  const cacheHit = await cache.restoreCache([themeRoot], cacheKey, [
-    restoreKey,
-  ]);
-  await exec.exec(`shopify theme pull ${themeRoot} --live`);
-  if (!cacheHit) await cache.saveCache([themeRoot], cacheKey);
-
-  step("Production build");
-  await exec.exec(`pnpm run webpack:build`);
-
-  step("Create preview theme");
-  const themeData = await fetch(
-    `https://${process.env.SHOPIFY_SHOP}/admin/api/2023-01/themes.json`,
-    {
-      method: "POST",
-      headers: {
-        "User-Agent": "Shopify Theme Action",
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": process.env.SHOPIFY_PASSWORD,
-      },
-      body: JSON.stringify({
-        theme: {
-          name: themeName,
-          role: "development",
-        },
-      }),
-    }
-  ).then((response) => response.json());
-
-  step("Update preview theme");
+  logStep("Update preview theme");
   await exec.exec(
-    `shopify theme push ${themeRoot} --nodelete --theme="${themeName}"`
+    `shopify theme push ${themeRoot} --nodelete --theme=${previewTheme.id}`
   );
 
-  step("Create github comment");
-  await createGitHubComment(themeData.id);
-}
-
-function step(name) {
-  core.info(
-    `\n==============================\n${name}\n==============================\n`
-  );
+  logStep("Create github comment");
+  await createGitHubComment(previewTheme);
 }
 
 // Execute

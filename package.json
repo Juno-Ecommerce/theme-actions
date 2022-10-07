@@ -1,9 +1,8 @@
 {
   "description": "Github actions used across Juno Ecommerce Shopify projects.",
-  "repository": "",
   "license": "MIT",
   "scripts": {
-    "build": "node ./lib/build.js"
+    "build": "node ./scripts/build.js"
   },
   "dependencies": {
     "@actions/cache": "3.0.4",

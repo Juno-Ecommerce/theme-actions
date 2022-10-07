@@ -4,6 +4,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import diff from "microdiff";
+import { logStep, removeAssets } from "../../../lib/utils";
 
 async function runAction() {
   if (!process.env.THEME_ROOT)
@@ -15,7 +16,7 @@ async function runAction() {
   const manifestFile = process.env.BUILD_MANIFEST;
   const themeRoot = process.env.THEME_ROOT;
 
-  step("Download previous build manifest file");
+  logStep("Download previous build manifest file");
   let result = "{}";
   try {
     const tmpDir = path.join(os.tmpdir(), "theme-deploy");
@@ -29,7 +30,7 @@ async function runAction() {
   }
   const previousBuildManifest = JSON.parse(result);
 
-  step("Calculate diff");
+  logStep("Calculate diff");
   const currentBuildManifest = JSON.parse(
     fs.readFileSync(path.join(themeRoot, manifestFile), "utf-8")
   );
@@ -47,7 +48,7 @@ async function runAction() {
     .concat([manifestFile]);
 
   if (filesToUpload.length) {
-    step("Upload files");
+    logStep("Upload files");
     await exec.exec(`shopify theme push ${themeRoot}`, [
       "--allow-live",
       "--nodelete",
@@ -61,42 +62,14 @@ async function runAction() {
     .map(({ path: [file] }) => file);
 
   if (filesToRemove.length) {
-    step("Remove files");
-    const { default: PQueue } = await import("p-queue");
-    const { default: fetch } = await import("node-fetch");
-    const queue = new PQueue({ concurrency: 2 });
-
-    const removeAsset = (asset) =>
-      fetch(
-        `https://${process.env.SHOPIFY_SHOP}/admin/api/2023-01/themes/${process.env.SHOPIFY_THEME_ID}/assets.json?asset[key]=${asset}`,
-        {
-          method: "DELETE",
-          headers: {
-            "User-Agent": "Shopify Theme Action",
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": process.env.SHOPIFY_PASSWORD,
-          },
-        }
-      );
-    let count = 0;
-    const total = filesToRemove.length;
-    queue.on("next", () => {
-      console.log(`${count + 1}/${total} | Deleting [${filesToRemove[count]}]`);
-      count++;
+    logStep("Remove files");
+    await removeAssets({
+      shop: process.env.SHOPIFY_SHOP,
+      password: process.env.SHOPIFY_PASSWORD,
+      themeId: process.env.SHOPIFY_THEME_ID,
+      files: filesToRemove,
     });
-
-    for (const file of filesToRemove) {
-      queue.add(() => removeAsset(file));
-    }
-
-    await queue.onIdle();
   }
-}
-
-function step(name) {
-  core.info(
-    `\n==============================\n${name}\n==============================\n`
-  );
 }
 
 // Execute
