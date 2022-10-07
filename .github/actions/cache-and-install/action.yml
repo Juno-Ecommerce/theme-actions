@@ -29,6 +29,7 @@ runs:
 
     - name: Install dependencies
       run: pnpm --prefer-offline install
+      shell: bash
 
     - name: Restore build cache
       uses: actions/cache@v3

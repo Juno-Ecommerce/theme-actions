@@ -14,6 +14,8 @@ runs:
 
     - name: Install Shopify CLI
       run: gem install shopify-cli
+      shell: bash
 
     - name: Configure Shopify CLI
       run: node ${ github.action_path }}/index.js
+      shell: bash
