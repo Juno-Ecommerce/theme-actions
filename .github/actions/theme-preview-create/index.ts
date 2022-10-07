@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 if (!process.env.THEME_ROOT)
   throw new Error("Missing [THEME_ROOT] environment variable");
 
-(async () => {
+async function runAction() {
   const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
   const themeRoot = process.env.THEME_ROOT;
 
@@ -63,7 +63,7 @@ if (!process.env.THEME_ROOT)
 
   step("Create github comment");
   await createGitHubComment(themeData.id);
-})();
+}
 
 function step(name) {
   core.info(
