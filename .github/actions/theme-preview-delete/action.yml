@@ -9,5 +9,5 @@ inputs:
     required: true
 
 runs:
-  using: "node"
+  using: "node16"
   main: "index.js"
