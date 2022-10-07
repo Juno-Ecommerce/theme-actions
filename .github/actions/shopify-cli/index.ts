@@ -1,5 +1,5 @@
-import core from "@actions/core";
-import exec from "@actions/exec";
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
 
 async function runAction() {
   step("Configuring shopify CLI");
@@ -10,8 +10,8 @@ async function runAction() {
   YAML`);
 
   const timeout = setTimeout(() => {
-    throw new Error("[shopify login] command took too longer than 10s");
-  }, 10 * 1000);
+    throw new Error("[shopify login] command took too longer than 30s");
+  }, 30 * 1000);
   await exec.exec("shopify login");
   clearTimeout(timeout);
 }

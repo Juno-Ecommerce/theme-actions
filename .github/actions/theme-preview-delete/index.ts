@@ -1,4 +1,5 @@
-import core from "@actions/core";
+import * as core from "@actions/core";
+
 import fetch from "node-fetch";
 
 const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;

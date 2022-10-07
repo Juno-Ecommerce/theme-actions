@@ -1,5 +1,5 @@
-import exec from "@actions/exec";
-import core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as core from "@actions/core";
 import fs from "fs";
 import os from "os";
 import path from "path";

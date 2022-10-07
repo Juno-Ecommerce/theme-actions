@@ -1,7 +1,7 @@
-import core from "@actions/core";
-import cache from "@actions/cache";
-import exec from "@actions/exec";
-import github from "@actions/github";
+import * as core from "@actions/core";
+import * as cache from "@actions/cache";
+import * as exec from "@actions/exec";
+import * as github from "@actions/github";
 import fetch from "node-fetch";
 
 if (!process.env.THEME_ROOT)
