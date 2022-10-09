@@ -12,7 +12,7 @@ jobs:
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
 
       - name: Run lint-staged
-        run: pnpm lint-staged --diff="${{ github.base_ref }}...${{ github.head_ref }}"
+        run: pnpm lint-staged --diff="origin/${{ github.base_ref }}...origin/${{ github.head_ref }}"
 
   theme-check:
     runs-on: ubuntu-latest
