@@ -48,7 +48,7 @@ jobs:
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
 
       - name: Update deployment status (success)
-        if: success()
+        if: ${{ success() }}
         uses: altinukshini/deployment-status@v1.0.1
         with:
           token: ${{ github.token }}
@@ -56,7 +56,7 @@ jobs:
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
 
       - name: Update deployment status (failure)
-        if: failure()
+        if: ${{ failure() }}
         uses: altinukshini/deployment-status@v1.0.1
         with:
           token: ${{ github.token }}

@@ -38,7 +38,7 @@ async function runAction() {
 
     const tmpRoot = "dist-live-theme";
     const restoreKey = "live-theme-cache";
-    const cacheKey = `${restoreKey}-${new Date().toISOString().split("T")[0]}`;
+    const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
     const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
       restoreKey,
     ]);

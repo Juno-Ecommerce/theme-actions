@@ -30,14 +30,13 @@ runs:
       run: pnpm --prefer-offline install
       shell: bash
 
-    - name: Restore build cache
+    - name: Tools cache
       uses: actions/cache@v3
-      if: ${{ inputs.build == 'true' }}
       with:
-        path: node_modules/.cache/webpack/
-        key: webpack-build-${{ github.head_ref }}
+        path: ${{ github.workspace }}/node_modules/.cache/
+        key: tools-cache-${{ github.head_ref }}-${{ inputs.build }}
         restore-keys: |
-          webpack-build-
+          tools-cache-
 
     - name: Generate production build
       if: ${{ inputs.build == 'true' }}
