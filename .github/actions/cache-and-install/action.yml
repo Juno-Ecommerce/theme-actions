@@ -40,5 +40,5 @@ runs:
 
     - name: Generate production build
       if: ${{ inputs.build == 'true' }}
-      run: pnpm run webpack:build --progress
+      run: pnpm run webpack:build
       shell: bash

@@ -20,6 +20,7 @@ jobs:
     env:
       SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
       SHOPIFY_SHOP: ${{ secrets.SHOP }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repo + setup node
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
