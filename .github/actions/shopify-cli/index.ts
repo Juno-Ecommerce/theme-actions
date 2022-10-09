@@ -1,8 +1,9 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import { logStep } from "../../../lib/utils";
 
 async function runAction() {
-  step("Configuring shopify CLI");
+  logStep("Configuring shopify CLI");
 
   await exec.exec(`mkdir -p ~/.config/shopify && cat <<-YAML > ~/.config/shopify/config
   [analytics]
@@ -10,16 +11,10 @@ async function runAction() {
   YAML`);
 
   const timeout = setTimeout(() => {
-    throw new Error("[shopify login] command took too longer than 30s");
+    throw new Error("[shopify login] command took longer than 30s");
   }, 30 * 1000);
   await exec.exec("shopify login");
   clearTimeout(timeout);
-}
-
-function step(name) {
-  core.info(
-    `\n==============================\n${name}\n==============================\n`
-  );
 }
 
 // Execute

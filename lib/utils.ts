@@ -1,17 +1,16 @@
 import * as core from "@actions/core";
 import PQueue from "p-queue";
-import fetch from "node-fetch";
+import { Client, request } from "undici";
 
 type Theme = {
+  created_at: string;
   id: number;
   name: string;
-  created_at: string;
-  updated_at: string;
+  previewable: boolean;
+  processing: boolean;
   role: "main" | "unpublished" | "demo" | "development";
-  theme_store_id: null;
-  previewable: true;
-  processing: false;
-  admin_graphql_api_id: "gid://shopify/Theme/752253240";
+  theme_store_id: number | null;
+  updated_at: string;
 };
 
 const API_VERSION = "2023-01";
@@ -20,7 +19,7 @@ export async function getStoreThemes(props: {
   shop: string;
   password: string;
 }) {
-  const response = await fetch(
+  const { body } = await request(
     `https://${props.shop}/admin/api/${API_VERSION}/themes.json`,
     {
       headers: {
@@ -29,8 +28,7 @@ export async function getStoreThemes(props: {
       },
     }
   );
-
-  const { themes } = (await response.json()) as { themes: Theme[] };
+  const { themes } = (await body.json()) as { themes: Theme[] };
 
   return themes;
 }
@@ -41,7 +39,7 @@ export async function createTheme(props: {
   themeName: string;
   role?: "unpublished" | "development";
 }) {
-  const response = await fetch(
+  const { body } = await request(
     `https://${props.shop}/admin/api/${API_VERSION}/themes.json`,
     {
       method: "POST",
@@ -58,9 +56,9 @@ export async function createTheme(props: {
     }
   );
 
-  const theme = await response.json();
+  const theme = (await body.json()) as Theme;
 
-  return theme as Theme;
+  return theme;
 }
 
 export async function deleteTheme(props: {
@@ -68,7 +66,7 @@ export async function deleteTheme(props: {
   password: string;
   themeId: string;
 }) {
-  const response = await fetch(
+  const { body } = await request(
     `https://${props.shop}/admin/api/${API_VERSION}/themes/${props.themeId}.json`,
     {
       method: "DELETE",
@@ -78,7 +76,8 @@ export async function deleteTheme(props: {
       },
     }
   );
-  const theme = await response.json();
+
+  const theme = (await body.json()) as Theme;
 
   return theme;
 }
@@ -86,36 +85,39 @@ export async function deleteTheme(props: {
 export async function removeAssets(props: {
   shop: string;
   password: string;
-  themeId: number;
+  themeId: number | string;
   files: string[];
 }) {
-  const request = (asset: string) =>
-    fetch(
-      `https://${props.shop}/admin/api/2023-01/themes/${props.themeId}/assets.json?asset[key]=${asset}`,
-      {
+  const queue = new PQueue({ concurrency: 2 });
+  const client = new Client(`https://${props.shop}`, {
+    pipelining: 2,
+  });
+
+  logQueueProgress: {
+    let count = 0;
+    queue.on("next", () => {
+      console.log(
+        `${count + 1}/${props.files.length} | Deleting [${props.files[count]}]`
+      );
+      count++;
+    });
+  }
+
+  for (const file of props.files) {
+    queue.add(() =>
+      client.request({
+        path: `/admin/api/${API_VERSION}/themes/${props.themeId}/assets.json?asset[key]=${file}`,
         method: "DELETE",
         headers: {
           "User-Agent": "Juno Theme Action",
           "X-Shopify-Access-Token": props.password,
         },
-      }
+      })
     );
-
-  const queue = new PQueue({ concurrency: 2 });
-
-  let count = 0;
-  queue.on("next", () => {
-    console.log(
-      `${count + 1}/${props.files.length} | Deleting [${props.files[count]}]`
-    );
-    count++;
-  });
-
-  for (const file of props.files) {
-    queue.add(() => request(file));
   }
 
   await queue.onIdle();
+  await client.close();
 }
 
 export function logStep(name: string) {

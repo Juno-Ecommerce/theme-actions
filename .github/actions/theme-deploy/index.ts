@@ -9,9 +9,14 @@ import { logStep, removeAssets } from "../../../lib/utils";
 async function runAction() {
   if (!process.env.THEME_ROOT)
     throw new Error("Missing [THEME_ROOT] environment variable");
-
   if (!process.env.BUILD_MANIFEST)
     throw new Error("Missing [BUILD_MANIFEST] environment variable");
+  if (!process.env.SHOPIFY_SHOP)
+    throw new Error("Missing [SHOPIFY_SHOP] environment variable");
+  if (!process.env.SHOPIFY_PASSWORD)
+    throw new Error("Missing [SHOPIFY_PASSWORD] environment variable");
+  if (!process.env.SHOPIFY_THEME_ID)
+    throw new Error("Missing [SHOPIFY_PASSWORD] environment variable");
 
   const manifestFile = process.env.BUILD_MANIFEST;
   const themeRoot = process.env.THEME_ROOT;
@@ -42,13 +47,17 @@ async function runAction() {
     return;
   }
 
+  const tReg = /templates.+\.json/;
   const filesToUpload = changedDiff
-    .filter(({ type }) => ["CHANGE", "CREATE"].includes(type))
-    .map(({ path: [file] }) => file)
+    .filter(({ type, path }) => {
+      if (type === "CHANGE" && tReg.test(path.join(""))) return false;
+      return ["CHANGE", "CREATE"].includes(type);
+    })
+    .map(({ path }) => path.join(""))
     .concat([manifestFile]);
 
   if (filesToUpload.length) {
-    logStep("Upload files");
+    logStep("Uploading files");
     await exec.exec(`shopify theme push ${themeRoot}`, [
       "--allow-live",
       "--nodelete",
@@ -59,10 +68,10 @@ async function runAction() {
 
   const filesToRemove = changedDiff
     .filter(({ type }) => type === "REMOVE")
-    .map(({ path: [file] }) => file);
+    .map(({ path }) => path.join(""));
 
   if (filesToRemove.length) {
-    logStep("Remove files");
+    logStep("Removing files");
     await removeAssets({
       shop: process.env.SHOPIFY_SHOP,
       password: process.env.SHOPIFY_PASSWORD,

@@ -7,6 +7,10 @@ import { createTheme, getStoreThemes, logStep } from "../../../lib/utils";
 async function runAction() {
   if (!process.env.THEME_ROOT)
     throw new Error("Missing [THEME_ROOT] environment variable");
+  if (!process.env.SHOPIFY_SHOP)
+    throw new Error("Missing [SHOPIFY_SHOP] environment variable");
+  if (!process.env.SHOPIFY_PASSWORD)
+    throw new Error("Missing [SHOPIFY_PASSWORD] environment variable");
 
   const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
   const themeRoot = process.env.THEME_ROOT;
@@ -18,6 +22,11 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
+
+  const ignoredFilesFlags = (process.env.IGNORED_FILES || "")
+    .trim()
+    .split("\n")
+    .map((pattern) => `--ignore=${pattern}`);
 
   if (!previewTheme) {
     logStep("Preview theme not found, creating new theme");
@@ -33,15 +42,24 @@ async function runAction() {
     const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
       restoreKey,
     ]);
-    await exec.exec(`shopify theme pull ${tmpRoot} --live`);
+
+    await exec.exec(`shopify theme pull ${tmpRoot}`, [
+      "--live",
+      ...ignoredFilesFlags,
+    ]);
     if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-    await exec.exec(`shopify theme push ${tmpRoot} --theme=${previewTheme.id}`);
+    await exec.exec(`shopify theme push ${tmpRoot}`, [
+      `--theme=${previewTheme.id}`,
+      ...ignoredFilesFlags,
+    ]);
   }
 
   logStep("Update preview theme");
-  await exec.exec(
-    `shopify theme push ${themeRoot} --nodelete --theme=${previewTheme.id}`
-  );
+  await exec.exec(`shopify theme push ${themeRoot}`, [
+    `--nodelete`,
+    `--theme=${previewTheme.id}`,
+    ...ignoredFilesFlags,
+  ]);
 
   logStep("Create github comment");
   await createGitHubComment(previewTheme);
@@ -95,7 +113,7 @@ async function createGitHubComment(themeId) {
         issue_number: prID,
         body: `${commentIdentifier}\n🚀 Preview deployed successfully!\nPlease add the below urls to your Jira ticket, for the PM to review.\n
 
-\`\`\`
+${"```"}
 Theme preview:
 https://${process.env.SHOPIFY_SHOP}/?preview_theme_id=${themeId}
 
