@@ -11,8 +11,8 @@ jobs:
       - name: Checkout repo + setup node
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
 
-      - name: Run linters
-        run: pnpm run lint
+      - name: Run lint-staged
+        run: pnpm lint-staged --diff="${{ github.base_ref }}...${{ github.head_ref }}"
 
   theme-check:
     runs-on: ubuntu-latest
