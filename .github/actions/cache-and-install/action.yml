@@ -32,7 +32,7 @@ runs:
 
     - name: Restore build cache
       uses: actions/cache@v3
-      if: inputs.build == 1
+      if: ${{ inputs.build == 'true' }}
       with:
         path: node_modules/.cache/webpack/
         key: webpack-build-${{ github.head_ref }}
@@ -40,6 +40,6 @@ runs:
           webpack-build-
 
     - name: Generate production build
-      if: inputs.build == 1
+      if: ${{ inputs.build == 'true' }}
       run: pnpm run webpack:build
       shell: bash
