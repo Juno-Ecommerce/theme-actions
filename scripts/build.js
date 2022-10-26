@@ -18,7 +18,7 @@ for (const actionEntry of actionEntries) {
       format: "cjs",
       outfile: dirname(actionEntry) + "/index.js",
       platform: "node",
-      target: "node16",
+      target: "node18",
     })
     .catch(() => process.exit(1));
 }
