@@ -9,17 +9,15 @@ on:
         required: true
 
 env:
-  CI: 1
-  THEME_ROOT: dist
   BUILD_MANIFEST: assets/__manifest
+  SHOPIFY_FLAG_PATH: dist
+  SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
+  SHOPIFY_FLAG_THEME_ID: ${{ secrets.THEME_ID }}
+  SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      SHOPIFY_PASSWORD: ${{ secrets.PASSWORD }}
-      SHOPIFY_SHOP: ${{ secrets.SHOP }}
-      SHOPIFY_THEME_ID: ${{ secrets.THEME_ID }}
     steps:
       - name: Create GitHub deployment
         id: deployment
@@ -32,9 +30,6 @@ jobs:
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
         with:
           build: true
-
-      - name: Setup Shopify CLI
-        uses: Juno-Ecommerce/theme-actions/.github/actions/shopify-cli@main
 
       - name: Update deployment status (Inprogress)
         uses: altinukshini/deployment-status@v1.0.1

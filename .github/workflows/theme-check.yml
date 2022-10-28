@@ -1,8 +1,8 @@
 on: workflow_call
 
 env:
-  THEME_ROOT: dist
   BUILD_MANIFEST: assets/__manifest
+  SHOPIFY_FLAG_PATH: dist
 
 jobs:
   lint:

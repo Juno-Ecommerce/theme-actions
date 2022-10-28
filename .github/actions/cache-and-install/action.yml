@@ -26,8 +26,13 @@ runs:
         node-version: 18
         cache: "pnpm"
 
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1
+        bundler: "latest"
+
     - name: Install dependencies
-      run: pnpm --prefer-offline install
+      run: pnpm --prefer-offline install && pnpm add -g @shopify/cli @shopify/theme
       shell: bash
 
     - name: Tools cache

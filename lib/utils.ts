@@ -1,3 +1,4 @@
+import * as github from "@actions/github";
 import * as core from "@actions/core";
 import PQueue from "p-queue";
 import { Client, request } from "undici";
@@ -13,6 +14,7 @@ type Theme = {
   updated_at: string;
 };
 
+const BASE_URL = `https://theme-kit-access.shopifyapps.com`;
 const API_VERSION = "2023-01";
 
 export async function getStoreThemes(props: {
@@ -20,11 +22,13 @@ export async function getStoreThemes(props: {
   password: string;
 }) {
   const { body } = await request(
-    `https://${props.shop}/admin/api/${API_VERSION}/themes.json`,
+    `${BASE_URL}/cli/admin/api/${API_VERSION}/themes.json`,
     {
       headers: {
-        "User-Agent": "Juno Theme Action",
+        Accept: "application/json",
+        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
+        "X-Shopify-Shop": props.shop,
       },
     }
   );
@@ -40,12 +44,14 @@ export async function createTheme(props: {
   role?: "unpublished" | "development";
 }) {
   const { body } = await request(
-    `https://${props.shop}/admin/api/${API_VERSION}/themes.json`,
+    `${BASE_URL}/cli/admin/api/${API_VERSION}/themes.json`,
     {
       method: "POST",
       headers: {
-        "User-Agent": "Juno Theme Action",
+        Accept: "application/json",
+        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
+        "X-Shopify-Shop": props.shop,
       },
       body: JSON.stringify({
         theme: {
@@ -67,12 +73,14 @@ export async function deleteTheme(props: {
   themeId: string;
 }) {
   const { body } = await request(
-    `https://${props.shop}/admin/api/${API_VERSION}/themes/${props.themeId}.json`,
+    `${BASE_URL}/cli/admin/api/${API_VERSION}/themes/${props.themeId}.json`,
     {
       method: "DELETE",
       headers: {
-        "User-Agent": "Juno Theme Action",
+        Accept: "application/json",
+        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
+        "X-Shopify-Shop": props.shop,
       },
     }
   );
@@ -89,7 +97,7 @@ export async function removeAssets(props: {
   files: string[];
 }) {
   const queue = new PQueue({ concurrency: 2 });
-  const client = new Client(`https://${props.shop}`, {
+  const client = new Client(BASE_URL, {
     pipelining: 2,
   });
 
@@ -103,15 +111,18 @@ export async function removeAssets(props: {
     });
   }
 
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-Shopify-Access-Token": props.password,
+    "X-Shopify-Shop": props.shop,
+  };
   for (const file of props.files) {
     queue.add(() =>
       client.request({
-        path: `/admin/api/${API_VERSION}/themes/${props.themeId}/assets.json?asset[key]=${file}`,
+        path: `/cli/admin/api/${API_VERSION}/themes/${props.themeId}/assets.json?asset[key]=${file}`,
         method: "DELETE",
-        headers: {
-          "User-Agent": "Juno Theme Action",
-          "X-Shopify-Access-Token": props.password,
-        },
+        headers,
       })
     );
   }
@@ -124,4 +135,59 @@ export function logStep(name: string) {
   core.info(
     `\n==============================\n${name}\n==============================\n`
   );
+}
+
+export async function createGitHubComment(themeId) {
+  const prID = github.context.payload.pull_request?.number;
+  if (!prID) {
+    throw new Error("Unable to find PR");
+  }
+
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error("Missing {GITHUB_TOKEN} environment variable");
+  }
+
+  // TODO: Preview specific for current store?
+
+  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const commentIdentifier =
+    "<!-- Comment by Shopify Theme Deploy Previews Action -->";
+  let commentID;
+
+  findCommentId: {
+    core.debug(`[DEBUG] - Searching for comment`);
+    const { data: listOfComments } = await octokit.rest.issues.listComments({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: prID,
+    });
+    commentID = listOfComments.find((comment) =>
+      comment.body?.includes(commentIdentifier)
+    )?.id;
+    if (commentID) core.debug(`[DEBUG] - Found comment with ID: ${commentID}`);
+    else core.debug(`[DEBUG] - Comment not found`);
+  }
+
+  if (!commentID) {
+    try {
+      core.debug(`[DEBUG] - Adding comment to PR`);
+      await octokit.rest.issues.createComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: prID,
+        body: `${commentIdentifier}\n🚀 Preview deployed successfully!\nPlease add the below urls to your Jira ticket, for the PM to review.\n
+
+${"```"}
+Theme preview:
+https://${process.env.SHOPIFY_FLAG_STORE}/?preview_theme_id=${themeId}
+
+Customize this theme in the Theme Editor
+https://${process.env.SHOPIFY_FLAG_STORE}/admin/themes/${themeId}/editor`,
+      });
+      core.debug(`[DEBUG] - Comment added successfully`);
+    } catch (error) {
+      core.debug(`[DEBUG] - Error while adding comment`);
+      core.setFailed(error.message);
+    }
+  }
 }
