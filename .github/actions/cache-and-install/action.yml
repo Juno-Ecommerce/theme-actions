@@ -32,7 +32,7 @@ runs:
         bundler: "latest"
 
     - name: Install dependencies
-      run: pnpm --prefer-offline install && pnpm add -g @shopify/cli @shopify/theme
+      run: pnpm --prefer-offline install
       shell: bash
 
     - name: Tools cache
