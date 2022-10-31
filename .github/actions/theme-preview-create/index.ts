@@ -46,7 +46,6 @@ async function runAction() {
     const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
       restoreKey,
     ]);
-
     await exec.exec(`pnpm shopify theme pull`, [
       "--live",
       `--path=${tmpRoot}`,
@@ -62,6 +61,7 @@ async function runAction() {
 
   logStep("Update preview theme");
   await exec.exec(`pnpm shopify theme push`, [
+    `--path=dist`,
     `--nodelete`,
     `--theme=${previewTheme.id}`,
     ...ignoredFilesFlags,
