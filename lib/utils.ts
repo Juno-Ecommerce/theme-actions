@@ -138,7 +138,7 @@ export function logStep(name: string) {
   );
 }
 
-export async function createGitHubComment(themeId) {
+export async function createGitHubComment(themeId: number) {
   const prID = github.context.payload.pull_request?.number;
   if (!prID) {
     throw new Error("Unable to find PR");

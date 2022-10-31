@@ -71,7 +71,7 @@ async function runAction() {
   ]);
 
   logStep("Create github comment");
-  await createGitHubComment(previewTheme);
+  await createGitHubComment(previewTheme.id);
 }
 
 // Execute
