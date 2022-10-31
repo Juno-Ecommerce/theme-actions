@@ -2,12 +2,17 @@ import * as core from "@actions/core";
 import { deleteTheme, getStoreThemes, logStep } from "../../../lib/utils";
 
 async function runAction() {
+  if (!process.env.SHOPIFY_FLAG_STORE)
+    throw new Error("Missing [SHOPIFY_FLAG_STORE] environment variable");
+  if (!process.env.SHOPIFY_CLI_THEME_TOKEN)
+    throw new Error("Missing [SHOPIFY_CLI_THEME_TOKEN] environment variable");
+
   const themeName = `Juno/Preview - ${process.env.GITHUB_HEAD_REF}`;
 
   logStep("Retrieve preview theme id");
   const allThemes = await getStoreThemes({
-    shop: process.env.SHOPIFY_SHOP,
-    password: process.env.SHOPIFY_PASSWORD,
+    shop: process.env.SHOPIFY_FLAG_STORE,
+    password: process.env.SHOPIFY_CLI_THEME_TOKEN,
   });
 
   const previewTheme = allThemes.find((t) => t.name === themeName);
@@ -19,8 +24,8 @@ async function runAction() {
 
   logStep("Deleting preview theme");
   await deleteTheme({
-    shop: process.env.SHOPIFY_SHOP,
-    password: process.env.SHOPIFY_PASSWORD,
+    shop: process.env.SHOPIFY_FLAG_STORE,
+    password: process.env.SHOPIFY_CLI_THEME_TOKEN,
     themeId: previewTheme.id,
   });
   core.info(`Preview theme [${themeName}] has been deleted`);

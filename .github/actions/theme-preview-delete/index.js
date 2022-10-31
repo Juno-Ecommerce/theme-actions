@@ -58,7 +58,7 @@ ${A.format(t)}
 ==============================
 ${e}
 ==============================
-`)}async function eB(){let e=`Juno/Preview - ${process.env.GITHUB_HEAD_REF}`;bp("Retrieve preview theme id");let t=(await Qg({shop:process.env.SHOPIFY_SHOP,password:process.env.SHOPIFY_PASSWORD})).find(r=>r.name===e);if(!t){f1.notice(`Preview theme [${e}] not found. Skipping.`);return}bp("Deleting preview theme"),await fg({shop:process.env.SHOPIFY_SHOP,password:process.env.SHOPIFY_PASSWORD,themeId:t.id}),f1.info(`Preview theme [${e}] has been deleted`)}try{eB()}catch(e){f1.setFailed(e)}
+`)}async function eB(){if(!process.env.SHOPIFY_FLAG_STORE)throw new Error("Missing [SHOPIFY_FLAG_STORE] environment variable");if(!process.env.SHOPIFY_CLI_THEME_TOKEN)throw new Error("Missing [SHOPIFY_CLI_THEME_TOKEN] environment variable");let e=`Juno/Preview - ${process.env.GITHUB_HEAD_REF}`;bp("Retrieve preview theme id");let t=(await Qg({shop:process.env.SHOPIFY_FLAG_STORE,password:process.env.SHOPIFY_CLI_THEME_TOKEN})).find(r=>r.name===e);if(!t){f1.notice(`Preview theme [${e}] not found. Skipping.`);return}bp("Deleting preview theme"),await fg({shop:process.env.SHOPIFY_FLAG_STORE,password:process.env.SHOPIFY_CLI_THEME_TOKEN,themeId:t.id}),f1.info(`Preview theme [${e}] has been deleted`)}try{eB()}catch(e){f1.setFailed(e)}
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *

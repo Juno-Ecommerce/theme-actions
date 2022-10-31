@@ -71,7 +71,7 @@ export async function createTheme(props: {
 export async function deleteTheme(props: {
   shop: string;
   password: string;
-  themeId: string;
+  themeId: number;
 }) {
   const { body } = await request(
     `${BASE_URL}/cli/admin/api/${API_VERSION}/themes/${props.themeId}.json`,
