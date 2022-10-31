@@ -15,7 +15,6 @@ env:
 jobs:
   create_or_update:
     runs-on: ubuntu-latest
-    if: github.event_name != 'close' # TODO
     env:
       GITHUB_TOKEN: ${{ github.token }}
       SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
@@ -26,17 +25,7 @@ jobs:
         with:
           build: true
 
-      - name: Update (and create) preview theme
+      - name: Update (+ create) preview theme
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-create@main
         with:
           IGNORED_FILES: ${{ secrets.IGNORED_FILES }}
-
-  delete:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'close' # TODO
-    env:
-      SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
-      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
-    steps:
-      - name: Delete preview theme
-        uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-delete@main
