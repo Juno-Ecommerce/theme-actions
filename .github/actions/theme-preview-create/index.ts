@@ -6,6 +6,7 @@ import {
   getStoreThemes,
   logStep,
   createGitHubComment,
+  deleteTheme,
 } from "../../../lib/utils";
 
 async function runAction() {
@@ -25,6 +26,10 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
+  if (previewTheme) {
+    await deleteTheme(previewTheme.id);
+    previewTheme = undefined;
+  }
 
   let ignoredFilesFlags: string[] = [];
   if (process.env.IGNORED_FILES)
