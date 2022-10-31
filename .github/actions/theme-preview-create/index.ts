@@ -32,33 +32,31 @@ async function runAction() {
       .split("\n")
       .map((pattern) => `--ignore=${pattern}`);
 
-  if (!previewTheme) {
-    logStep("Preview theme not found, creating new theme");
-    previewTheme = await createTheme({
-      shop: process.env.SHOPIFY_FLAG_STORE,
-      password: process.env.SHOPIFY_CLI_THEME_TOKEN,
-      themeName,
-    });
+  // if (!previewTheme) {
+  logStep("Preview theme not found, creating new theme");
+  previewTheme = await createTheme({
+    shop: process.env.SHOPIFY_FLAG_STORE,
+    password: process.env.SHOPIFY_CLI_THEME_TOKEN,
+    themeName,
+  });
 
-    const tmpRoot = "dist-live-theme";
-    const restoreKey = "live-theme-cache";
-    const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
-    const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
-      restoreKey,
-    ]);
+  const tmpRoot = "dist-live-theme";
+  const restoreKey = "live-theme-cache";
+  const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
+  const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
 
-    await exec.exec(`pnpm shopify theme pull`, [
-      "--live",
-      `--path=${tmpRoot}`,
-      ...ignoredFilesFlags,
-    ]);
-    if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-    await exec.exec(`pnpm shopify theme push`, [
-      `--path=${tmpRoot}`,
-      `--theme=${previewTheme.id}`,
-      ...ignoredFilesFlags,
-    ]);
-  }
+  await exec.exec(`pnpm shopify theme pull`, [
+    "--live",
+    `--path=${tmpRoot}`,
+    ...ignoredFilesFlags,
+  ]);
+  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+  await exec.exec(`pnpm shopify theme push`, [
+    `--path=${tmpRoot}`,
+    `--theme=${previewTheme.id}`,
+    ...ignoredFilesFlags,
+  ]);
+  // }
 
   logStep("Update preview theme");
   await exec.exec(`pnpm shopify theme push`, [
