@@ -11,8 +11,6 @@ on:
 env:
   BUILD_MANIFEST: assets/__manifest
   SHOPIFY_FLAG_PATH: dist
-  SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
-  SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
 
 jobs:
   create_or_update:
@@ -20,6 +18,8 @@ jobs:
     if: github.event_name != 'closed' # TODO
     env:
       GITHUB_TOKEN: ${{ github.token }}
+      SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
     steps:
       - name: Prepare
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
@@ -32,6 +32,9 @@ jobs:
   delete:
     runs-on: ubuntu-latest
     if: github.event_name == 'closed' # TODO
+    env:
+      SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
     steps:
       - name: Delete preview theme
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-delete@main

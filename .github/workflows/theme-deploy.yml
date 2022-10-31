@@ -11,9 +11,6 @@ on:
 env:
   BUILD_MANIFEST: assets/__manifest
   SHOPIFY_FLAG_PATH: dist
-  SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
-  SHOPIFY_FLAG_THEME_ID: ${{ secrets.THEME_ID }}
-  SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
 
 jobs:
   deploy:
@@ -40,6 +37,10 @@ jobs:
           description: "Deploying code for branch: "
 
       - name: Deploy theme
+        env:
+          SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
+          SHOPIFY_FLAG_THEME_ID: ${{ secrets.THEME_ID }}
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-deploy@main
 
       - name: Update deployment status (success)
