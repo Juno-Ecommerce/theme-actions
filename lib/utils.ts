@@ -32,7 +32,12 @@ export async function getStoreThemes(props: {
       },
     }
   );
-  const { themes } = (await body.json()) as { themes: Theme[] };
+  console.log({ body });
+  const data = await body.json();
+  console.log({ data });
+
+  const { themes } = data as { themes: Theme[] };
+  console.log({ themes });
 
   return themes;
 }
