@@ -10,7 +10,7 @@ on:
 
 env:
   BUILD_MANIFEST: assets/__manifest
-  SHOPIFY_FLAG_PATH: dist
+  SHOPIFY_FLAG_PATH: ${{ github.workspace }}/dist
 
 jobs:
   create_or_update:
