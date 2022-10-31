@@ -17,7 +17,6 @@ async function runAction() {
     throw new Error("Missing [SHOPIFY_CLI_THEME_TOKEN] environment variable");
 
   const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
-  const themeRoot = process.env.SHOPIFY_FLAG_PATH;
 
   logStep("Check if preview theme already exists");
   const allThemes = await getStoreThemes({
@@ -25,16 +24,13 @@ async function runAction() {
     password: process.env.SHOPIFY_CLI_THEME_TOKEN,
   });
 
-  console.log({ allThemes });
-
   let previewTheme = allThemes.find((t) => t.name === themeName);
 
-  const ignoredFilesFlags = (process.env.IGNORED_FILES || "")
-    .trim()
-    .split("\n")
-    .map((pattern) => `--ignore=${pattern}`);
-
-  console.log({ ignoredFilesFlags });
+  let ignoredFilesFlags: string[] = [];
+  if (process.env.IGNORED_FILES)
+    ignoredFilesFlags = process.env.IGNORED_FILES.trim()
+      .split("\n")
+      .map((pattern) => `--ignore=${pattern}`);
 
   if (!previewTheme) {
     logStep("Preview theme not found, creating new theme");
@@ -51,13 +47,13 @@ async function runAction() {
       restoreKey,
     ]);
 
-    await exec.exec(`shopify theme pull`, [
+    await exec.exec(`pnpm shopify theme pull`, [
       "--live",
       `--path=${tmpRoot}`,
       ...ignoredFilesFlags,
     ]);
     if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-    await exec.exec(`shopify theme push`, [
+    await exec.exec(`pnpm shopify theme push`, [
       `--path=${tmpRoot}`,
       `--theme=${previewTheme.id}`,
       ...ignoredFilesFlags,
@@ -65,7 +61,7 @@ async function runAction() {
   }
 
   logStep("Update preview theme");
-  await exec.exec(`shopify theme push`, [
+  await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
     ...ignoredFilesFlags,
