@@ -15,7 +15,7 @@ env:
 jobs:
   create_or_update:
     runs-on: ubuntu-latest
-    if: github.event_name != 'closed' # TODO
+    if: github.event_name != 'close' # TODO
     env:
       GITHUB_TOKEN: ${{ github.token }}
       SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
@@ -33,7 +33,7 @@ jobs:
 
   delete:
     runs-on: ubuntu-latest
-    if: github.event_name == 'closed' # TODO
+    if: github.event_name == 'close' # TODO
     env:
       SHOPIFY_FLAG_STORE: ${{ secrets.SHOP }}
       SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.PASSWORD }}
