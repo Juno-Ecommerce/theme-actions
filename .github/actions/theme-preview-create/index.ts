@@ -6,6 +6,7 @@ import {
   getStoreThemes,
   logStep,
   createGitHubComment,
+  deleteTheme,
 } from "../../../lib/utils";
 
 async function runAction() {
@@ -25,6 +26,13 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
+  if (previewTheme) {
+    deleteTheme({
+      shop: process.env.SHOPIFY_FLAG_STORE,
+      password: process.env.SHOPIFY_CLI_THEME_TOKEN,
+      themeId: previewTheme.id,
+    });
+  }
 
   let ignoredFilesFlags: string[] = [];
   if (process.env.IGNORED_FILES)
@@ -39,6 +47,7 @@ async function runAction() {
     password: process.env.SHOPIFY_CLI_THEME_TOKEN,
     themeName,
   });
+  console.log({ previewTheme });
 
   const tmpRoot = "dist-live-theme";
   const restoreKey = "live-theme-cache";

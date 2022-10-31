@@ -23,7 +23,7 @@ async function runAction() {
   let result = "{}";
   try {
     const tmpDir = path.join(os.tmpdir(), "theme-deploy");
-    await exec.exec(`shopify theme pull`, [
+    await exec.exec(`pnpm shopify theme pull`, [
       `--path=${tmpDir}`,
       `--only=${manifestFile}`,
     ]);
@@ -56,7 +56,7 @@ async function runAction() {
 
   if (filesToUpload.length) {
     logStep("Uploading files");
-    await exec.exec(`shopify theme push`, [
+    await exec.exec(`pnpm shopify theme push`, [
       "--allow-live",
       "--nodelete",
       ...filesToUpload.map((f) => `--only=${f}`),
