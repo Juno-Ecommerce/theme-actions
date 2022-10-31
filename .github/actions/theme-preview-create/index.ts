@@ -32,6 +32,8 @@ async function runAction() {
     .split("\n")
     .map((pattern) => `--ignore=${pattern}`);
 
+  console.log({ ignoredFilesFlags });
+
   if (!previewTheme) {
     logStep("Preview theme not found, creating new theme");
     previewTheme = await createTheme({
