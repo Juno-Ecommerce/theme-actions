@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import { deleteTheme, getStoreThemes, logStep } from "../../../lib/utils";
 
 async function runAction() {
-  const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
+  const themeName = `Juno/Preview - ${process.env.GITHUB_HEAD_REF}`;
 
   logStep("Retrieve preview theme id");
   const allThemes = await getStoreThemes({

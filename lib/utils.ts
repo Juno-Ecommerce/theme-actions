@@ -63,7 +63,7 @@ export async function createTheme(props: {
     }
   );
 
-  const theme = (await body.json()) as Theme;
+  const { theme } = (await body.json()) as { theme: Theme };
 
   return theme;
 }

@@ -6,7 +6,6 @@ import {
   getStoreThemes,
   logStep,
   createGitHubComment,
-  deleteTheme,
 } from "../../../lib/utils";
 
 async function runAction() {
@@ -17,7 +16,7 @@ async function runAction() {
   if (!process.env.SHOPIFY_CLI_THEME_TOKEN)
     throw new Error("Missing [SHOPIFY_CLI_THEME_TOKEN] environment variable");
 
-  const themeName = `Juno/${process.env.GITHUB_HEAD_REF} - Preview`;
+  const themeName = `Juno/Preview - ${process.env.GITHUB_HEAD_REF}`;
 
   logStep("Check if preview theme already exists");
   const allThemes = await getStoreThemes({
@@ -26,13 +25,6 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
-  if (previewTheme) {
-    deleteTheme({
-      shop: process.env.SHOPIFY_FLAG_STORE,
-      password: process.env.SHOPIFY_CLI_THEME_TOKEN,
-      themeId: previewTheme.id,
-    });
-  }
 
   let ignoredFilesFlags: string[] = [];
   if (process.env.IGNORED_FILES)
@@ -40,32 +32,33 @@ async function runAction() {
       .split("\n")
       .map((pattern) => `--ignore=${pattern}`);
 
-  // if (!previewTheme) {
-  logStep("Preview theme not found, creating new theme");
-  previewTheme = await createTheme({
-    shop: process.env.SHOPIFY_FLAG_STORE,
-    password: process.env.SHOPIFY_CLI_THEME_TOKEN,
-    themeName,
-  });
-  console.log({ previewTheme });
+  if (!previewTheme) {
+    logStep("Preview theme not found, creating new theme");
+    previewTheme = await createTheme({
+      shop: process.env.SHOPIFY_FLAG_STORE,
+      password: process.env.SHOPIFY_CLI_THEME_TOKEN,
+      themeName,
+    });
 
-  const tmpRoot = "dist-live-theme";
-  const restoreKey = "live-theme-cache";
-  const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
-  const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
+    const tmpRoot = "dist-live-theme";
+    const restoreKey = "live-theme-cache";
+    const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
+    const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
+      restoreKey,
+    ]);
 
-  await exec.exec(`pnpm shopify theme pull`, [
-    "--live",
-    `--path=${tmpRoot}`,
-    ...ignoredFilesFlags,
-  ]);
-  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-  await exec.exec(`pnpm shopify theme push`, [
-    `--path=${tmpRoot}`,
-    `--theme=${previewTheme.id}`,
-    ...ignoredFilesFlags,
-  ]);
-  // }
+    await exec.exec(`pnpm shopify theme pull`, [
+      "--live",
+      `--path=${tmpRoot}`,
+      ...ignoredFilesFlags,
+    ]);
+    if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+    await exec.exec(`pnpm shopify theme push`, [
+      `--path=${tmpRoot}`,
+      `--theme=${previewTheme.id}`,
+      ...ignoredFilesFlags,
+    ]);
+  }
 
   logStep("Update preview theme");
   await exec.exec(`pnpm shopify theme push`, [
