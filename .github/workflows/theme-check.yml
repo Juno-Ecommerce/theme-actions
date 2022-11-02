@@ -1,4 +1,8 @@
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      disableThemeCheck:
+        type: boolean
 
 env:
   BUILD_MANIFEST: assets/__manifest
@@ -16,6 +20,7 @@ jobs:
 
   theme-check:
     runs-on: ubuntu-latest
+    if: inputs.disableThemeCheck != true
     steps:
       - name: Prepare
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
