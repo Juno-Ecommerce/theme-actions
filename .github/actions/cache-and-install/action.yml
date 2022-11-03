@@ -39,7 +39,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{ github.workspace }}/node_modules/.cache/
-        key: tools-cache-${{ github.head_ref }}-${{ inputs.build }}
+        key: tools-cache-${{ github.base_ref }}-${{ inputs.build }}
         restore-keys: |
           tools-cache-
 
