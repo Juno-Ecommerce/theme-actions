@@ -52,11 +52,15 @@ async function runAction() {
     ]);
     await exec.exec(`pnpm shopify theme pull`, [
       "--live",
+      "--only=config/settings_data.json",
+      "--only=locales/*.json",
+      "--only=templates/*.json",
       `--path=${tmpRoot}`,
       ...ignoredFilesFlags,
     ]);
     if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
     await exec.exec(`pnpm shopify theme push`, [
+      "--nodelete",
       `--path=${tmpRoot}`,
       `--theme=${previewTheme.id}`,
       ...ignoredFilesFlags,
