@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import diff from "microdiff";
-import { logStep, removeAssets } from "../../../lib/utils";
+import { getManifestAsset, logStep, removeAssets } from "../../../lib/utils";
 
 async function runAction() {
   if (!process.env.BUILD_MANIFEST)
@@ -20,18 +20,12 @@ async function runAction() {
   const themeRoot = process.env.SHOPIFY_FLAG_PATH ?? "./";
 
   logStep("Download previous build manifest file");
-  let result = "{}";
-  try {
-    const tmpDir = path.join(os.tmpdir(), "theme-deploy");
-    await exec.exec(`pnpm shopify theme pull`, [
-      `--path=${tmpDir}`,
-      `--only=${manifestFile}`,
-    ]);
-    result = fs.readFileSync(path.join(tmpDir, manifestFile), "utf-8");
-  } catch (error) {
-    core.warning(error);
-  }
-  const previousBuildManifest = JSON.parse(result);
+  const previousBuildManifest = await getManifestAsset({
+    asset: manifestFile,
+    password: process.env.SHOPIFY_CLI_THEME_TOKEN,
+    shop: process.env.SHOPIFY_FLAG_STORE,
+    themeId: process.env.SHOPIFY_FLAG_THEME_ID,
+  });
 
   logStep("Calculate diff");
   const currentBuildManifest = JSON.parse(

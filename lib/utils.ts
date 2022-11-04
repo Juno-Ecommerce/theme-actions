@@ -14,7 +14,7 @@ type Theme = {
   updated_at: string;
 };
 
-const BASE_URL = `https://theme-kit-access.shopifyapps.com`;
+const BASE_URL = "https://theme-kit-access.shopifyapps.com";
 const API_VERSION = "2023-01";
 
 export async function getStoreThemes(props: {
@@ -25,8 +25,6 @@ export async function getStoreThemes(props: {
     `${BASE_URL}/cli/admin/api/${API_VERSION}/themes.json`,
     {
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
         "X-Shopify-Shop": props.shop,
       },
@@ -49,8 +47,6 @@ export async function createTheme(props: {
     {
       method: "POST",
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
         "X-Shopify-Shop": props.shop,
       },
@@ -78,8 +74,6 @@ export async function deleteTheme(props: {
     {
       method: "DELETE",
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
         "X-Shopify-Access-Token": props.password,
         "X-Shopify-Shop": props.shop,
       },
@@ -89,6 +83,30 @@ export async function deleteTheme(props: {
   const theme = (await body.json()) as Theme;
 
   return theme;
+}
+
+export async function getManifestAsset(props: {
+  asset: string;
+  password: string;
+  shop: string;
+  themeId: number | string;
+}) {
+  const { body } = await request(
+    `${BASE_URL}/cli/admin/api/${API_VERSION}/themes/${props.themeId}/assets.json?asset[key]=${props.asset}`,
+    {
+      headers: {
+        "X-Shopify-Access-Token": props.password,
+        "X-Shopify-Shop": props.shop,
+      },
+    }
+  );
+
+  const { asset } = ((await body.json()) ?? {}) as {
+    asset?: { attachment: string };
+  };
+
+  if (!asset) return {};
+  return JSON.parse(Buffer.from(asset.attachment, "base64").toString("utf8"));
 }
 
 export async function removeAssets(props: {
@@ -112,18 +130,15 @@ export async function removeAssets(props: {
     });
   }
 
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    "X-Shopify-Access-Token": props.password,
-    "X-Shopify-Shop": props.shop,
-  };
   for (const file of props.files) {
     queue.add(() =>
       client.request({
         path: `/cli/admin/api/${API_VERSION}/themes/${props.themeId}/assets.json?asset[key]=${file}`,
         method: "DELETE",
-        headers,
+        headers: {
+          "X-Shopify-Access-Token": props.password,
+          "X-Shopify-Shop": props.shop,
+        },
       })
     );
   }
