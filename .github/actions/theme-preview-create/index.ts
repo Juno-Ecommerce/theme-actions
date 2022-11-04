@@ -55,6 +55,7 @@ async function runAction() {
       "--live",
       "--only=config/settings_data.json",
       "--only=locales/*.json",
+      "--only=sections/*",
       "--only=templates/*.json",
       `--path=${tmpRoot}`,
     ]);
