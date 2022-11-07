@@ -15,8 +15,11 @@ jobs:
       - name: Prepare
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
 
-      - name: Lint
-        run: pnpm run lint
+      - name: Lint CSS
+        run: pnpm run lint:css
+
+      - name: Lint JS
+        run: pnpm run lint:js
 
   theme-check:
     runs-on: ubuntu-latest
@@ -28,4 +31,4 @@ jobs:
           build: true
 
       - name: Theme check
-        run: pnpm shopify theme check
+        run: pnpm run lint:theme
