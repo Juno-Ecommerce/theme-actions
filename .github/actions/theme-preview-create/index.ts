@@ -70,8 +70,9 @@ async function runAction() {
   logStep("Update preview theme");
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
-    `--verbose`,
+    `--path=${process.env.SHOPIFY_FLAG_PATH}`,
     `--theme=${previewTheme.id}`,
+    `--verbose`,
     ...ignoredFilesFlags,
   ]);
 
