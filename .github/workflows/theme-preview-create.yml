@@ -23,9 +23,10 @@ jobs:
     steps:
       - name: Prepare
         uses: Juno-Ecommerce/theme-actions/.github/actions/cache-and-install@main
+        with:
+          build: true
 
       - name: Update (+ create) preview theme
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-create@main
         with:
-          build: true
           IGNORED_FILES: ${{ secrets.IGNORED_FILES }}
