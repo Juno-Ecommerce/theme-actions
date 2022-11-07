@@ -69,6 +69,7 @@ async function runAction() {
 
   logStep("Update preview theme");
   await exec.exec(`ls -la ${process.env.SHOPIFY_FLAG_PATH}`);
+  await exec.exec(`ls -la ${process.env.SHOPIFY_FLAG_PATH}/layout`);
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--verbose`,
