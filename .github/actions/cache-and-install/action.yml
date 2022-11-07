@@ -26,10 +26,12 @@ runs:
         node-version: 18
         cache: "pnpm"
 
-    # - uses: ruby/setup-ruby@v1
-    #   with:
-    #     ruby-version: 3.1
-    #     bundler: "latest"
+    - name: Install Rugby for Shopify CLI
+      if: ${{ inputs.build == 'true' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1
+        bundler: "latest"
 
     - name: Install dependencies
       run: pnpm --prefer-offline install
@@ -46,9 +48,4 @@ runs:
     - name: Generate production build
       if: ${{ inputs.build == 'true' }}
       run: pnpm run webpack:build
-      shell: bash
-
-    - name: List current dir
-      if: ${{ inputs.build == 'true' }}
-      run: ls -la .
       shell: bash
