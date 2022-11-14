@@ -45,8 +45,8 @@ async function runAction() {
       process.env.SHOPIFY_FLAG_PATH,
       "../dist-live-theme"
     );
-    const restoreKey = "live-theme-cache";
-    const cacheKey = `${restoreKey}-${new Date().toISOString().slice(0, 7)}`;
+    const restoreKey = "live-theme-cache-";
+    const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
     const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
       restoreKey,
     ]);

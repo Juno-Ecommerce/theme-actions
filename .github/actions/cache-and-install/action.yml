@@ -34,7 +34,7 @@ runs:
         bundler: "latest"
 
     - name: Install dependencies
-      run: pnpm --prefer-offline install
+      run: pnpm --prefer-offline --no-frozen-lockfile install
       shell: bash
 
     - name: Tools cache
