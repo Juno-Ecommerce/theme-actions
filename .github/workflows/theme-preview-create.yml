@@ -1,5 +1,7 @@
 on:
   workflow_call:
+    inputs:
+      IGNORED_FILES:
     secrets:
       PASSWORD:
         required: true
@@ -29,4 +31,4 @@ jobs:
       - name: Update (+ create) preview theme
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-create@main
         with:
-          IGNORED_FILES: ${{ secrets.IGNORED_FILES }}
+          IGNORED_FILES: ${{ inputs.IGNORED_FILES }}

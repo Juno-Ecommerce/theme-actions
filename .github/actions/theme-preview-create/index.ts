@@ -33,8 +33,10 @@ async function runAction() {
 
   core.debug(
     JSON.stringify({
-      ignoredFiles: process.env.IGNORED_FILES,
-      ignoredPatterns: ignoredFilesFlags,
+      ignoredFiles: {
+        ignoredFiles: process.env.IGNORED_FILES,
+        ignoredPatterns: ignoredFilesFlags,
+      },
     })
   );
 
