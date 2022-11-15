@@ -2,6 +2,7 @@ on:
   workflow_call:
     inputs:
       IGNORED_FILES:
+        type: string
     secrets:
       PASSWORD:
         required: true
