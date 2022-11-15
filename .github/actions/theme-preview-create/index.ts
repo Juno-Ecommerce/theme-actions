@@ -26,17 +26,22 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
-  let ignoredFilesFlags =
+  const ignoredPushFiles =
     core
-      .getInput("IGNORED_FILES")
+      .getInput("IGNORED_FILES_PUSH")
+      .split(" ")
+      .map((pattern) => `--ignore=${pattern}`) ?? [];
+  const ignoredPullFiles =
+    core
+      .getInput("IGNORED_FILES_PULL")
       .split(" ")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
 
   core.debug(
     JSON.stringify({
       ignoredFiles: {
-        ignoredFiles: core.getInput("IGNORED_FILES"),
-        ignoredPatterns: ignoredFilesFlags,
+        ignoredPullFiles: ignoredPullFiles,
+        ignoredPushFiles: ignoredPushFiles,
       },
     })
   );
@@ -74,15 +79,7 @@ async function runAction() {
     "--only=sections/*",
     "--only=templates/*.json",
     `--path=${tmpRoot}`,
-    ...ignoredFilesFlags.filter(
-      (f) =>
-        ![
-          "config/settings_data.json",
-          "locales/*.json",
-          "sections/*",
-          "templates/*.json",
-        ].includes(f)
-    ),
+    ...ignoredPullFiles,
   ]);
   if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
   core.debug(
@@ -106,14 +103,14 @@ async function runAction() {
       "pnpm shopify theme push": [
         `--nodelete`,
         `--theme=${previewTheme.id}`,
-        ...ignoredFilesFlags,
+        ...ignoredPushFiles,
       ],
     })
   );
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
-    ...ignoredFilesFlags,
+    ...ignoredPushFiles,
   ]);
 
   logStep("Create github comment");

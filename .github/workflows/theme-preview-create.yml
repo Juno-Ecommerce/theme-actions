@@ -1,15 +1,15 @@
 on:
   workflow_call:
     inputs:
-      IGNORED_FILES:
+      IGNORED_FILES_PUSH:
+        type: string
+      IGNORED_FILES_PULL:
         type: string
     secrets:
       PASSWORD:
         required: true
       SHOP:
         required: true
-      IGNORED_FILES:
-        required: false
 
 env:
   SHOPIFY_CLI_NO_ANALYTICS: true
@@ -32,4 +32,5 @@ jobs:
       - name: Update (+ create) preview theme
         uses: Juno-Ecommerce/theme-actions/.github/actions/theme-preview-create@main
         with:
-          IGNORED_FILES: ${{ inputs.IGNORED_FILES }}
+          IGNORED_FILES_PUSH: ${{ inputs.IGNORED_FILES_PUSH }}
+          IGNORED_FILES_PULL: ${{ inputs.IGNORED_FILES_PULL }}

@@ -7,7 +7,10 @@ inputs:
   SHOPIFY_SHOP:
     description: "The shopify development store i.e. my-store.myshopify.com"
     required: true
-  IGNORED_FILES:
+  IGNORED_FILES_PULL:
+    description: "List of files to ignore"
+    required: false
+  IGNORED_FILES_PUSH:
     description: "List of files to ignore"
     required: false
 
