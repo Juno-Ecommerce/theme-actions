@@ -81,7 +81,7 @@ async function runAction() {
   //   `--path=${tmpRoot}`,
   //   ...ignoredPullFiles,
   // ]);
-  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+  // if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
   core.debug(
     JSON.stringify({
       "pnpm shopify theme push": [
