@@ -92,12 +92,24 @@ async function runAction() {
     })
   );
 
-  await exec.exec(`ls -la ${tmpRoot}`);
-
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
     `--theme=${previewTheme.id}`,
+    "--only=config/settings_data.json",
+    "--only=locales/*.json",
+  ]);
+  await exec.exec(`pnpm shopify theme push`, [
+    "--nodelete",
+    `--path=${tmpRoot}`,
+    `--theme=${previewTheme.id}`,
+    "--only=sections/*",
+  ]);
+  await exec.exec(`pnpm shopify theme push`, [
+    "--nodelete",
+    `--path=${tmpRoot}`,
+    `--theme=${previewTheme.id}`,
+    "--only=templates/*.json",
   ]);
 
   logStep("Update preview theme");
