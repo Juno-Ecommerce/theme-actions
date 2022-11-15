@@ -74,6 +74,15 @@ async function runAction() {
     "--only=sections/*",
     "--only=templates/*.json",
     `--path=${tmpRoot}`,
+    ...ignoredFilesFlags.filter(
+      (f) =>
+        ![
+          "config/settings_data.json",
+          "locales/*.json",
+          "sections/*",
+          "templates/*.json",
+        ].includes(f)
+    ),
   ]);
   if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
   core.debug(
