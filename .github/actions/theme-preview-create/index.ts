@@ -59,77 +59,25 @@ async function runAction() {
   const restoreKey = "live-theme-cache-";
   const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
   const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
-  core.debug(JSON.stringify({ cacheHit }));
-  core.debug(
-    JSON.stringify({
-      "pnpm shopify theme pull": [
-        "--live",
-        "--only=config/settings_data.json",
-        "--only=locales/*.json",
-        "--only=sections/*",
-        "--only=templates/*.json",
-        `--path=${tmpRoot}`,
-      ],
-    })
-  );
-  // await exec.exec(`pnpm shopify theme pull`, [
-  //   "--live",
-  //   "--only=config/settings_data.json",
-  //   "--only=locales/*.json",
-  //   "--only=sections/*",
-  //   "--only=templates/*.json",
-  //   `--path=${tmpRoot}`,
-  //   ...ignoredPullFiles,
-  // ]);
-  // if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-  core.debug(
-    JSON.stringify({
-      "pnpm shopify theme push": [
-        "--nodelete",
-        `--path=${tmpRoot}`,
-        `--theme=${previewTheme.id}`,
-      ],
-    })
-  );
+  core.info(JSON.stringify({ cacheHit }));
+  await exec.exec(`pnpm shopify theme pull`, [
+    "--live",
+    "--only=config/settings_data.json",
+    "--only=locales/*.json",
+    "--only=sections/*",
+    "--only=templates/*.json",
+    `--path=${tmpRoot}`,
+    ...ignoredPullFiles,
+  ]);
+  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
 
-  // await new Promise((res) => setTimeout(() => res(true), 5000));
-
-  // await exec.exec(`pnpm shopify theme push`, [
-  //   "--nodelete",
-  //   `--path=${tmpRoot}`,
-  //   `--theme=${previewTheme.id}`,
-  //   "--only=config/settings_data.json",
-  //   "--only=locales/*.json",
-  // ]);
-
-  // await new Promise((res) => setTimeout(() => res(true), 5000));
-
-  // await exec.exec(`pnpm shopify theme push`, [
-  //   "--nodelete",
-  //   `--path=${tmpRoot}`,
-  //   `--theme=${previewTheme.id}`,
-  //   "--only=sections/*",
-  // ]);
-
-  // await new Promise((res) => setTimeout(() => res(true), 5000));
-
-  // await exec.exec(`pnpm shopify theme push`, [
-  //   "--nodelete",
-  //   `--path=${tmpRoot}`,
-  //   `--theme=${previewTheme.id}`,
-  //   "--only=templates/*.json",
-  // ]);
+  await exec.exec(`pnpm shopify theme push`, [
+    "--nodelete",
+    `--path=${tmpRoot}`,
+    `--theme=${previewTheme.id}`,
+  ]);
 
   logStep("Update preview theme");
-  core.debug(
-    JSON.stringify({
-      "pnpm shopify theme push": [
-        `--nodelete`,
-        `--theme=${previewTheme.id}`,
-        ...ignoredPushFiles,
-      ],
-    })
-  );
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
