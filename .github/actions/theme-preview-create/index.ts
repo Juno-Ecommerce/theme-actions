@@ -29,7 +29,7 @@ async function runAction() {
   let ignoredFilesFlags =
     core
       .getInput("IGNORED_FILES")
-      .split("\n")
+      .split(" ")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
 
   core.debug(
