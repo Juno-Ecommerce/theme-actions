@@ -81,7 +81,7 @@ async function runAction() {
     `--path=${tmpRoot}`,
     ...ignoredPullFiles,
   ]);
-  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+  // if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
   core.debug(
     JSON.stringify({
       "pnpm shopify theme push": [
@@ -92,6 +92,8 @@ async function runAction() {
     })
   );
 
+  await new Promise((res) => setTimeout(() => res(true), 5000));
+
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
@@ -99,12 +101,18 @@ async function runAction() {
     "--only=config/settings_data.json",
     "--only=locales/*.json",
   ]);
+
+  await new Promise((res) => setTimeout(() => res(true), 5000));
+
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
     `--theme=${previewTheme.id}`,
     "--only=sections/*",
   ]);
+
+  await new Promise((res) => setTimeout(() => res(true), 5000));
+
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
