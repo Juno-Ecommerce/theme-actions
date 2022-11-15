@@ -27,14 +27,15 @@ async function runAction() {
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
   let ignoredFilesFlags =
-    process.env.IGNORED_FILES?.trim()
+    core
+      .getInput("IGNORED_FILES")
       .split("\n")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
 
   core.debug(
     JSON.stringify({
       ignoredFiles: {
-        ignoredFiles: process.env.IGNORED_FILES,
+        ignoredFiles: core.getInput("IGNORED_FILES"),
         ignoredPatterns: ignoredFilesFlags,
       },
     })
