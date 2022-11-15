@@ -48,53 +48,48 @@ async function runAction() {
       password: process.env.SHOPIFY_CLI_THEME_TOKEN,
       themeName,
     });
-
-    const tmpRoot = resolve(
-      process.env.SHOPIFY_FLAG_PATH,
-      "../dist-live-theme"
-    );
-    const restoreKey = "live-theme-cache-";
-    const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
-    const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
-      restoreKey,
-    ]);
-    core.debug(JSON.stringify({ cacheHit }));
-    core.debug(
-      JSON.stringify({
-        "pnpm shopify theme pull": [
-          "--live",
-          "--only=config/settings_data.json",
-          "--only=locales/*.json",
-          "--only=sections/*",
-          "--only=templates/*.json",
-          `--path=${tmpRoot}`,
-        ],
-      })
-    );
-    await exec.exec(`pnpm shopify theme pull`, [
-      "--live",
-      "--only=config/settings_data.json",
-      "--only=locales/*.json",
-      "--only=sections/*",
-      "--only=templates/*.json",
-      `--path=${tmpRoot}`,
-    ]);
-    if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-    core.debug(
-      JSON.stringify({
-        "pnpm shopify theme push": [
-          "--nodelete",
-          `--path=${tmpRoot}`,
-          `--theme=${previewTheme.id}`,
-        ],
-      })
-    );
-    await exec.exec(`pnpm shopify theme push`, [
-      "--nodelete",
-      `--path=${tmpRoot}`,
-      `--theme=${previewTheme.id}`,
-    ]);
   }
+
+  const tmpRoot = resolve(process.env.SHOPIFY_FLAG_PATH, "../dist-live-theme");
+  const restoreKey = "live-theme-cache-";
+  const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
+  const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
+  core.debug(JSON.stringify({ cacheHit }));
+  core.debug(
+    JSON.stringify({
+      "pnpm shopify theme pull": [
+        "--live",
+        "--only=config/settings_data.json",
+        "--only=locales/*.json",
+        "--only=sections/*",
+        "--only=templates/*.json",
+        `--path=${tmpRoot}`,
+      ],
+    })
+  );
+  await exec.exec(`pnpm shopify theme pull`, [
+    "--live",
+    "--only=config/settings_data.json",
+    "--only=locales/*.json",
+    "--only=sections/*",
+    "--only=templates/*.json",
+    `--path=${tmpRoot}`,
+  ]);
+  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+  core.debug(
+    JSON.stringify({
+      "pnpm shopify theme push": [
+        "--nodelete",
+        `--path=${tmpRoot}`,
+        `--theme=${previewTheme.id}`,
+      ],
+    })
+  );
+  await exec.exec(`pnpm shopify theme push`, [
+    "--nodelete",
+    `--path=${tmpRoot}`,
+    `--theme=${previewTheme.id}`,
+  ]);
 
   logStep("Update preview theme");
   core.debug(
