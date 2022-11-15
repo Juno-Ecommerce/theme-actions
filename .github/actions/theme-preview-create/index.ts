@@ -26,12 +26,15 @@ async function runAction() {
   });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
-
-  let ignoredFilesFlags: string[] = [];
-  if (process.env.IGNORED_FILES)
-    ignoredFilesFlags = process.env.IGNORED_FILES.trim()
+  let ignoredFilesFlags =
+    process.env.IGNORED_FILES?.trim()
       .split("\n")
-      .map((pattern) => `--ignore=${pattern}`);
+      .map((pattern) => `--ignore=${pattern}`) ?? [];
+
+  console.log({
+    ignoredFiles: process.env.IGNORED_FILES,
+    ignoredPatterns: ignoredFilesFlags,
+  });
 
   if (!previewTheme) {
     logStep("Preview theme not found, creating new theme");
