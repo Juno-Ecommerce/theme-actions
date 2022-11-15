@@ -31,10 +31,12 @@ async function runAction() {
       .split("\n")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
 
-  console.log({
-    ignoredFiles: process.env.IGNORED_FILES,
-    ignoredPatterns: ignoredFilesFlags,
-  });
+  core.debug(
+    JSON.stringify({
+      ignoredFiles: process.env.IGNORED_FILES,
+      ignoredPatterns: ignoredFilesFlags,
+    })
+  );
 
   if (!previewTheme) {
     logStep("Preview theme not found, creating new theme");
@@ -53,7 +55,19 @@ async function runAction() {
     const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [
       restoreKey,
     ]);
-    console.log({ cacheHit });
+    core.debug(JSON.stringify({ cacheHit }));
+    core.debug(
+      JSON.stringify({
+        "pnpm shopify theme pull": [
+          "--live",
+          "--only=config/settings_data.json",
+          "--only=locales/*.json",
+          "--only=sections/*",
+          "--only=templates/*.json",
+          `--path=${tmpRoot}`,
+        ],
+      })
+    );
     await exec.exec(`pnpm shopify theme pull`, [
       "--live",
       "--only=config/settings_data.json",
@@ -63,6 +77,15 @@ async function runAction() {
       `--path=${tmpRoot}`,
     ]);
     if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
+    core.debug(
+      JSON.stringify({
+        "pnpm shopify theme push": [
+          "--nodelete",
+          `--path=${tmpRoot}`,
+          `--theme=${previewTheme.id}`,
+        ],
+      })
+    );
     await exec.exec(`pnpm shopify theme push`, [
       "--nodelete",
       `--path=${tmpRoot}`,
@@ -71,6 +94,15 @@ async function runAction() {
   }
 
   logStep("Update preview theme");
+  core.debug(
+    JSON.stringify({
+      "pnpm shopify theme push": [
+        `--nodelete`,
+        `--theme=${previewTheme.id}`,
+        ...ignoredFilesFlags,
+      ],
+    })
+  );
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
