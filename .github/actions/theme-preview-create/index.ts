@@ -91,6 +91,9 @@ async function runAction() {
       ],
     })
   );
+
+  await exec.exec(`ls -la ${tmpRoot}`);
+
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
