@@ -71,9 +71,8 @@ async function runAction() {
   ]);
   if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
 
-  await exec.exec(`pnpm shopify theme push`, [
+  await exec.exec(`pnpm shopify theme push --path ${tmpRoot}`, [
     "--nodelete",
-    `--path=${tmpRoot}`,
     `--theme=${previewTheme.id}`,
   ]);
 
