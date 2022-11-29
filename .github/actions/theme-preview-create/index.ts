@@ -29,15 +29,15 @@ async function runAction() {
   const ignoredPushFiles =
     core
       .getInput("IGNORED_FILES_PUSH")
-      .trim()
       .split(" ")
-      .map((pattern) => `--ignore=${pattern}`) ?? [];
+      .map((pattern) => pattern && `--ignore=${pattern}`)
+      .filter(Boolean) ?? [];
   const ignoredPullFiles =
     core
       .getInput("IGNORED_FILES_PULL")
-      .trim()
       .split(" ")
-      .map((pattern) => `--ignore=${pattern}`) ?? [];
+      .map((pattern) => pattern && `--ignore=${pattern}`)
+      .filter(Boolean) ?? [];
 
   core.debug(
     JSON.stringify({
