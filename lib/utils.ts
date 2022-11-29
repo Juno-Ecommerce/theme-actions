@@ -184,26 +184,37 @@ export async function createGitHubComment(themeId: number) {
     else core.debug(`[DEBUG] - Comment not found`);
   }
 
-  if (!commentID) {
-    try {
-      core.debug(`[DEBUG] - Adding comment to PR`);
+  const commentBody = `${commentIdentifier}\n🚀 Preview created successfully!\nPlease add the below urls to Jira ticket (if applicable) for the PM/QA to review.\n
+
+  ${"```"}
+  Share this theme preview:
+  https://${process.env.SHOPIFY_FLAG_STORE}/?preview_theme_id=${themeId}
+
+  Customize this theme in the Theme Editor
+  https://${process.env.SHOPIFY_FLAG_STORE}/admin/themes/${themeId}/editor`;
+
+  try {
+    if (commentID) {
+      core.debug(`[DEBUG] - Updating comment`);
+      await octokit.rest.issues.updateComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        comment_id: commentID,
+        body: commentBody,
+      });
+      core.debug(`[DEBUG] - Comment updated successfully`);
+    } else {
+      core.debug(`[DEBUG] - Creating comment`);
       await octokit.rest.issues.createComment({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         issue_number: prID,
-        body: `${commentIdentifier}\n🚀 Preview deployed successfully!\nPlease add the below urls to your Jira ticket, for the PM to review.\n
-
-${"```"}
-Theme preview:
-https://${process.env.SHOPIFY_FLAG_STORE}/?preview_theme_id=${themeId}
-
-Customize this theme in the Theme Editor
-https://${process.env.SHOPIFY_FLAG_STORE}/admin/themes/${themeId}/editor`,
+        body: commentBody,
       });
       core.debug(`[DEBUG] - Comment added successfully`);
-    } catch (error) {
-      core.debug(`[DEBUG] - Error while adding comment`);
-      core.setFailed(error.message);
     }
+  } catch (error) {
+    core.debug(`[DEBUG] - Error while adding/updating comment`);
+    core.setFailed(error.message);
   }
 }
