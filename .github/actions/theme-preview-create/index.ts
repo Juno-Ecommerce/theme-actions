@@ -29,11 +29,13 @@ async function runAction() {
   const ignoredPushFiles =
     core
       .getInput("IGNORED_FILES_PUSH")
+      .trim()
       .split(" ")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
   const ignoredPullFiles =
     core
       .getInput("IGNORED_FILES_PULL")
+      .trim()
       .split(" ")
       .map((pattern) => `--ignore=${pattern}`) ?? [];
 
@@ -71,8 +73,11 @@ async function runAction() {
   ]);
   if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
 
-  await exec.exec(`pnpm shopify theme push --path ${tmpRoot}`, [
+  await exec.exec(`pnpm shopify theme info`);
+
+  await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
+    `--path=${tmpRoot}`,
     `--theme=${previewTheme.id}`,
   ]);
 
