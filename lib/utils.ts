@@ -195,7 +195,7 @@ export async function createGitHubComment(themeId: number) {
 
   try {
     if (commentID) {
-      core.debug(`[DEBUG] - Updating comment`);
+      core.debug(`[DEBUG] - Updating comment for ID={${commentID}}`);
       await octokit.rest.issues.updateComment({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
