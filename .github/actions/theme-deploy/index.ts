@@ -50,6 +50,7 @@ async function runAction() {
 
   if (filesToUpload.length) {
     logStep("Uploading files");
+    console.log({ filesToUpload });
     await exec.exec(`pnpm shopify theme push`, [
       "--allow-live",
       "--nodelete",
@@ -63,6 +64,7 @@ async function runAction() {
 
   if (filesToRemove.length) {
     logStep("Removing files");
+    console.log({ filesToRemove });
     await removeAssets({
       shop: process.env.SHOPIFY_FLAG_STORE,
       password: process.env.SHOPIFY_CLI_THEME_TOKEN,
