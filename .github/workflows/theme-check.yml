@@ -33,3 +33,7 @@ jobs:
 
       - name: Theme check
         run: pnpm run lint:theme
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kentaro-m/auto-assign-action@v1.2.4
