@@ -53,7 +53,7 @@ export async function createTheme(props: {
       body: JSON.stringify({
         theme: {
           name: props.themeName,
-          role: props.role ?? "development",
+          role: props.role ?? "unpublished",
         },
       }),
     }
