@@ -13,6 +13,7 @@ on:
 
 env:
   SHOPIFY_CLI_NO_ANALYTICS: true
+  SHOPIFY_CLI_TTY: 0
   BUILD_MANIFEST: assets/__manifest
   SHOPIFY_FLAG_PATH: ${{ github.workspace }}/dist
 
