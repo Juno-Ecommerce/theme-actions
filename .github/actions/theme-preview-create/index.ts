@@ -66,10 +66,8 @@ async function runAction() {
   core.info(JSON.stringify({ cacheHit }));
   await exec.exec(`pnpm shopify theme pull`, [
     "--live",
-    "--only=config/settings_data.json",
-    "--only=locales/*.json",
+    "--only=*/*.json",
     "--only=sections/*",
-    "--only=templates/*.json",
     `--path=${tmpRoot}`,
     ...ignoredPullFiles,
   ]);
