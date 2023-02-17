@@ -9,6 +9,8 @@ import {
   createGitHubComment,
 } from "../../../lib/utils";
 
+let timeout;
+
 async function runAction() {
   if (!process.env.SHOPIFY_FLAG_PATH)
     throw new Error("Missing [SHOPIFY_FLAG_PATH] environment variable");
@@ -73,11 +75,21 @@ async function runAction() {
   ]);
   if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
 
+  timeout = setTimeout(() => {
+    throw new Error("Shopify's push action took too long, aborting.");
+  }, 1000 * 60 * 5); // 5 mins
+
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
     `--theme=${previewTheme.id}`,
   ]);
+
+  clearTimeout(timeout);
+
+  timeout = setTimeout(() => {
+    throw new Error("Shopify's push action took too long, aborting.");
+  }, 1000 * 60 * 5); // 5 mins
 
   logStep("Update preview theme");
   await exec.exec(`pnpm shopify theme push`, [
@@ -85,6 +97,8 @@ async function runAction() {
     `--theme=${previewTheme.id}`,
     ...ignoredPushFiles,
   ]);
+
+  clearTimeout(timeout);
 
   logStep("Create github comment");
   await createGitHubComment(previewTheme.id);
