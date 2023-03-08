@@ -21,7 +21,7 @@ export async function getStoreThemes(props: {
   shop: string;
   password: string;
 }) {
-  const { body } = await request(
+  const { body, statusCode } = await request(
     `${BASE_URL}/cli/admin/api/${API_VERSION}/themes.json`,
     {
       headers: {
@@ -30,6 +30,7 @@ export async function getStoreThemes(props: {
       },
     }
   );
+  console.log({ body, statusCode });
 
   const { themes } = (await body.json()) as { themes: Theme[] };
 

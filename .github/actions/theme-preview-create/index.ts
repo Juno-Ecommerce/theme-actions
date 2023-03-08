@@ -26,6 +26,7 @@ async function runAction() {
     shop: process.env.SHOPIFY_FLAG_STORE,
     password: process.env.SHOPIFY_CLI_THEME_TOKEN,
   });
+  console.log({ allThemes });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
   const ignoredPushFiles =
