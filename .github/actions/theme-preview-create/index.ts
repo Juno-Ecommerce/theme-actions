@@ -26,7 +26,6 @@ async function runAction() {
     shop: process.env.SHOPIFY_FLAG_STORE,
     password: process.env.SHOPIFY_CLI_THEME_TOKEN,
   });
-  console.log({ allThemes });
 
   let previewTheme = allThemes.find((t) => t.name === themeName);
   const ignoredPushFiles =
@@ -77,8 +76,6 @@ async function runAction() {
   timeout = setTimeout(() => {
     throw new Error("Shopify's push action took too long, aborting.");
   }, 1000 * 60 * 5); // 5 mins
-
-  console.log(process.env.SHOPIFY_CLI_TTY);
 
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
