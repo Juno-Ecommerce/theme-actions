@@ -77,8 +77,6 @@ async function runAction() {
     throw new Error("Shopify's push action took too long, aborting.");
   }, 1000 * 60 * 5); // 5 mins
 
-  console.log(process.env.SHOPIFY_CLI_TTY);
-
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
