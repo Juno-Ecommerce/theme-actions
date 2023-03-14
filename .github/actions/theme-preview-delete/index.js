@@ -66,3 +66,4 @@ ${e}
  * Released under the MIT License.
  */
 /*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
+//# sourceMappingURL=index.js.map

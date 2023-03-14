@@ -19,6 +19,7 @@ for (const actionEntry of actionEntries) {
       outfile: dirname(actionEntry) + "/index.js",
       platform: "node",
       target: "node18",
+      sourcemap: true,
     })
     .catch(() => process.exit(1));
 }
