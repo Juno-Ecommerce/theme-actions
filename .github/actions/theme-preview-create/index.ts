@@ -64,6 +64,8 @@ async function runAction() {
   const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
   const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
   core.info(JSON.stringify({ cacheHit }));
+
+  logStep("Live sync: Pull");
   await exec.exec(`pnpm shopify theme pull`, [
     "--live",
     "--only=*/*.json",
@@ -77,6 +79,7 @@ async function runAction() {
     throw new Error("Shopify's push action took too long, aborting.");
   }, 1000 * 60 * 5); // 5 mins
 
+  logStep("Live sync: Push");
   await exec.exec(`pnpm shopify theme push`, [
     "--nodelete",
     `--path=${tmpRoot}`,
