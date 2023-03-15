@@ -34,7 +34,9 @@ runs:
         bundler: "latest"
 
     - name: Install dependencies
-      run: pnpm --prefer-offline --no-frozen-lockfile install
+      run: |
+        pnpm --prefer-offline --no-frozen-lockfile install
+        pnpm add --global @shopify/cli@3.44.1 @shopify/theme@3.44.1
       shell: bash
 
     - name: Tools cache
