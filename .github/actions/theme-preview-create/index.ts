@@ -97,6 +97,7 @@ async function runAction() {
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
+    "--ignore=config/settings_data.json",
     ...ignoredPushFiles,
   ]);
 
