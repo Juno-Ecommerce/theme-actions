@@ -68,8 +68,9 @@ async function runAction() {
   logStep("Live sync: Pull");
   await exec.exec(`pnpm shopify theme pull`, [
     "--live",
-    "--only=*/*.json",
     "--only=sections/*",
+    "--only=templates/*",
+    "--only=*/*.json",
     `--path=${tmpRoot}`,
     ...ignoredPullFiles,
   ]);
@@ -96,6 +97,7 @@ async function runAction() {
   await exec.exec(`pnpm shopify theme push`, [
     `--nodelete`,
     `--theme=${previewTheme.id}`,
+    "--ignore=config/settings_data.json",
     ...ignoredPushFiles,
   ]);
 
