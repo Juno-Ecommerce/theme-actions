@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import * as core from "@actions/core";
-import * as cache from "@actions/cache";
 import * as exec from "@actions/exec";
 import {
   createTheme,
@@ -57,35 +56,33 @@ async function runAction() {
       password: process.env.SHOPIFY_CLI_THEME_TOKEN,
       themeName,
     });
+
+    const tmpRoot = resolve(
+      process.env.SHOPIFY_FLAG_PATH,
+      "../dist-live-theme"
+    );
+
+    logStep("Live sync: Pull");
+    await exec.exec(`pnpm shopify theme pull`, [
+      "--live",
+      "--only=sections/*",
+      "--only=templates/*",
+      "--only=*/*.json",
+      `--path=${tmpRoot}`,
+      ...ignoredPullFiles,
+    ]);
+
+    timeout = setTimeout(() => {
+      throw new Error("Shopify's push action took too long, aborting.");
+    }, 1000 * 60 * 5); // 5 mins
+
+    logStep("Live sync: Push");
+    await exec.exec(`pnpm shopify theme push`, [
+      "--nodelete",
+      `--path=${tmpRoot}`,
+      `--theme=${previewTheme.id}`,
+    ]);
   }
-
-  const tmpRoot = resolve(process.env.SHOPIFY_FLAG_PATH, "../dist-live-theme");
-  const restoreKey = "live-theme-cache-";
-  const cacheKey = `${restoreKey}${new Date().toISOString().slice(0, 7)}`;
-  const cacheHit = await cache.restoreCache([tmpRoot], cacheKey, [restoreKey]);
-  core.info(JSON.stringify({ cacheHit }));
-
-  logStep("Live sync: Pull");
-  await exec.exec(`pnpm shopify theme pull`, [
-    "--live",
-    "--only=sections/*",
-    "--only=templates/*",
-    "--only=*/*.json",
-    `--path=${tmpRoot}`,
-    ...ignoredPullFiles,
-  ]);
-  if (!cacheHit) await cache.saveCache([tmpRoot], cacheKey);
-
-  timeout = setTimeout(() => {
-    throw new Error("Shopify's push action took too long, aborting.");
-  }, 1000 * 60 * 5); // 5 mins
-
-  logStep("Live sync: Push");
-  await exec.exec(`pnpm shopify theme push`, [
-    "--nodelete",
-    `--path=${tmpRoot}`,
-    `--theme=${previewTheme.id}`,
-  ]);
 
   clearTimeout(timeout);
 
